@@ -97,6 +97,7 @@ async function verifyShareFeature() {
   // 3. Test Copy Link handler
   console.log("\n3. Triggering handleCopyLink()...");
   mockDom.handleCopyLink();
+  await new Promise(r => setTimeout(r, 100));
   assert.strictEqual(mockDom.copiedText, "https://wedding-song-importer.vercel.app/studio_royal");
   const copyBtn = elementMap.get("btnCopyLink");
   assert.strictEqual(copyBtn.textContent, "✅ Copied!");

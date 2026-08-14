@@ -91,13 +91,25 @@ function getSavedBaseUrl() {
 }
 
 function getSavedStudioId() {
-    return localStorage.getItem("wedding_studio_id") || "trpworld";
+    var stored = localStorage.getItem("wedding_studio_id");
+    if (stored && stored.trim().length > 0) {
+        return stored.trim();
+    }
+    var input = document.getElementById("studioIdInput");
+    if (input && input.value && input.value.trim().length > 0 && input.value.trim() !== "default") {
+        return input.value.trim();
+    }
+    return "trpworld";
 }
 
-function getClientFormUrl() {
+function getResolvedClientUrl() {
     var baseUrl = getSavedBaseUrl();
     var studioId = getSavedStudioId();
     return baseUrl + "/" + encodeURIComponent(studioId);
+}
+
+function getClientFormUrl() {
+    return getResolvedClientUrl();
 }
 
 function getCloudApiUrl(endpoint) {
@@ -108,7 +120,7 @@ function getCloudApiUrl(endpoint) {
 function updateClientUrlDisplay() {
     var urlInput = document.getElementById("clientUrlDisplay");
     if (urlInput) {
-        var url = getClientFormUrl();
+        var url = getResolvedClientUrl();
         urlInput.value = url;
         urlInput.title = url;
     }
@@ -119,32 +131,62 @@ function updateClientUrlDisplay() {
     }
 }
 
-function handleCopyLink() {
-    var url = getClientFormUrl();
+function showCopySuccess(copiedUrl) {
     var btn = document.getElementById("btnCopyLink");
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url);
-    } else {
-        var urlInput = document.getElementById("clientUrlDisplay");
-        if (urlInput) {
-            urlInput.select();
-            document.execCommand("copy");
-        }
-    }
-
     if (btn) {
+        var originalText = "📋 Copy";
+        btn.innerHTML = "✅ Copied!";
         btn.textContent = "✅ Copied!";
         setTimeout(function() {
-            btn.textContent = "📋 Copy";
+            btn.innerHTML = originalText;
+            btn.textContent = originalText;
         }, 2000);
     }
+    logMessage("📋 Link copied to clipboard: " + copiedUrl);
+}
 
-    logMessage("Copied client link: " + url);
+function fallbackCopy(text) {
+    var tempInput = document.createElement("textarea");
+    tempInput.value = text;
+    tempInput.style.position = "fixed";
+    tempInput.style.left = "-9999px";
+    tempInput.style.top = "-9999px";
+    tempInput.style.opacity = "0";
+    document.body.appendChild(tempInput);
+    tempInput.focus();
+    tempInput.select();
+    try {
+        var successful = document.execCommand("copy");
+        if (successful) {
+            showCopySuccess(text);
+        } else {
+            throw new Error("execCommand copy returned false");
+        }
+    } catch (err) {
+        logMessage("Fallback copy error: " + err.message, true);
+    }
+    document.body.removeChild(tempInput);
+}
+
+function handleCopyLink() {
+    var url = getResolvedClientUrl();
+    if (!url) return;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url)
+            .then(function() {
+                showCopySuccess(url);
+            })
+            .catch(function() {
+                fallbackCopy(url);
+            });
+    } else {
+        fallbackCopy(url);
+    }
 }
 
 function handleShareWhatsApp() {
-    var url = getClientFormUrl();
+    var url = getResolvedClientUrl();
     var shareMsg = "Please select your wedding songs here: " + url;
     var waUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(shareMsg);
 
@@ -154,7 +196,7 @@ function handleShareWhatsApp() {
         window.open(waUrl, "_blank");
     }
 
-    logMessage("Opened WhatsApp share link.");
+    logMessage("Opened WhatsApp share link for " + url);
 }
 
 var currentStudioTemplate = [];

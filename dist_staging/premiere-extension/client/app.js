@@ -77,13 +77,32 @@ function handleSelectFolder() {
     });
 }
 
+var DEFAULT_BASE_URL = "https://wedding-song-importer.vercel.app";
+
+function getSavedBaseUrl() {
+    var saved = localStorage.getItem("wedding_base_url");
+    if (saved && saved.trim()) {
+        return saved.trim().replace(/\/+$/, "");
+    }
+    if (typeof window !== "undefined" && window.location && window.location.origin && window.location.origin.indexOf("http") === 0) {
+        return window.location.origin.replace(/\/+$/, "");
+    }
+    return DEFAULT_BASE_URL;
+}
+
 function getSavedStudioId() {
     return localStorage.getItem("wedding_studio_id") || "trpworld";
 }
 
 function getClientFormUrl() {
+    var baseUrl = getSavedBaseUrl();
     var studioId = getSavedStudioId();
-    return "https://wedding-song-importer.vercel.app/" + encodeURIComponent(studioId);
+    return baseUrl + "/" + encodeURIComponent(studioId);
+}
+
+function getCloudApiUrl(endpoint) {
+    var baseUrl = getSavedBaseUrl();
+    return baseUrl + "/api/" + endpoint;
 }
 
 function updateClientUrlDisplay() {
@@ -92,6 +111,11 @@ function updateClientUrlDisplay() {
         var url = getClientFormUrl();
         urlInput.value = url;
         urlInput.title = url;
+    }
+
+    var baseInput = document.getElementById("baseUrlInput");
+    if (baseInput) {
+        baseInput.value = getSavedBaseUrl();
     }
 }
 
@@ -139,7 +163,7 @@ function fetchStudioTemplate() {
     var studioId = getSavedStudioId();
     logMessage("Fetching ritual template for Studio ID [" + studioId + "]...");
 
-    var url = "https://wedding-song-importer.vercel.app/api/templates?studioId=" + encodeURIComponent(studioId);
+    var url = getCloudApiUrl("templates?studioId=" + encodeURIComponent(studioId));
 
     fetch(url)
         .then(function(res) { return res.json(); })
@@ -230,7 +254,7 @@ function saveStudioTemplate() {
     if (btn) btn.disabled = true;
     logMessage("Saving ritual template for [" + studioId + "]...");
 
-    var url = "https://wedding-song-importer.vercel.app/api/templates";
+    var url = getCloudApiUrl("templates");
 
     fetch(url, {
         method: "POST",
@@ -289,6 +313,20 @@ function initApp() {
             updateClientUrlDisplay();
             logMessage("Saved Studio ID: " + val + ". Syncing queue...");
             fetchSubmissionsData();
+        });
+    }
+
+    var baseInput = document.getElementById("baseUrlInput");
+    var btnSaveBase = document.getElementById("btnSaveBaseUrl");
+    if (btnSaveBase) {
+        btnSaveBase.addEventListener("click", function() {
+            var val = baseInput ? baseInput.value.trim() : "";
+            if (val) {
+                localStorage.setItem("wedding_base_url", val.replace(/\/+$/, ""));
+                updateClientUrlDisplay();
+                logMessage("Saved Base Web URL: " + getSavedBaseUrl() + ". Syncing queue...");
+                fetchSubmissionsData();
+            }
         });
     }
 
@@ -515,7 +553,7 @@ function fetchSubmissionsData() {
     var studioParam = "?studioId=" + encodeURIComponent(studioId);
 
     var cloudUrls = [
-        CLOUD_API_URL + studioParam,
+        getCloudApiUrl("submissions" + studioParam),
         "http://localhost:3000/api/submissions" + studioParam,
         "http://localhost:3001/api/submissions" + studioParam
     ];

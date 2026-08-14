@@ -582,6 +582,37 @@ function fetchSubmissionsData() {
     tryFetch(0);
 }
 
+function startProgressPolling(jobId, subId) {
+    var box = document.getElementById("progress-container-" + subId);
+    var statusText = document.getElementById("progress-status-" + subId);
+    var metaText = document.getElementById("progress-meta-" + subId);
+    var barFill = document.getElementById("progress-bar-" + subId);
+
+    if (box) box.style.display = "block";
+
+    var intervalId = setInterval(function() {
+        fetch(LOCAL_AGENT_URL + "/progress?job_id=" + encodeURIComponent(jobId))
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (!data) return;
+                var pct = Math.min(100, Math.max(0, data.percentage || 0));
+                if (barFill) barFill.style.width = pct + "%";
+                if (statusText) statusText.textContent = (data.status === "downloading" ? "⬇️ " : "⏳ ") + (data.current_song || "Downloading...");
+                if (metaText) metaText.textContent = Math.round(pct) + "% • " + (data.speed || "⚡ 0.0 MB/s") + " (ETA " + (data.eta || "0s") + ")";
+
+                if (data.status === "completed" || pct >= 100) {
+                    clearInterval(intervalId);
+                    if (barFill) barFill.style.width = "100%";
+                    if (statusText) statusText.textContent = "✅ Download Complete! Importing...";
+                    if (metaText) metaText.textContent = "100% • Done";
+                }
+            })
+            .catch(function() {});
+    }, 300);
+
+    return intervalId;
+}
+
 function renderSubmissions(query) {
     var container = document.getElementById("contentArea");
     container.innerHTML = "";
@@ -602,6 +633,8 @@ function renderSubmissions(query) {
     }
 
     filtered.forEach(function(sub) {
+        var subCleanId = (sub.id || "sub-" + Math.random()).replace(/[^a-zA-Z0-9_-]/g, "");
+
         var card = document.createElement("div");
         card.className = "card";
 
@@ -636,6 +669,20 @@ function renderSubmissions(query) {
             listEl.appendChild(itemEl);
         });
 
+        // Dynamic Real-Time Progress Bar Box
+        var progBox = document.createElement("div");
+        progBox.id = "progress-container-" + subCleanId;
+        progBox.className = "progress-box";
+        progBox.style.display = "none";
+        progBox.innerHTML =
+            '<div class="progress-info">' +
+                '<span id="progress-status-' + subCleanId + '" class="progress-status-text">⏳ Initializing...</span>' +
+                '<span id="progress-meta-' + subCleanId + '" class="progress-meta-text">0% • ⚡ 0.0 MB/s</span>' +
+            '</div>' +
+            '<div class="progress-bar-bg">' +
+                '<div id="progress-bar-' + subCleanId + '" class="progress-bar-fill" style="width: 0%;"></div>' +
+            '</div>';
+
         // Action Button
         var btnImport = document.createElement("button");
         btnImport.className = "btn btn-primary";
@@ -648,19 +695,20 @@ function renderSubmissions(query) {
         }
 
         btnImport.addEventListener("click", function() {
-            handleDownloadAndImport(sub, btnImport);
+            handleDownloadAndImport(sub, btnImport, subCleanId);
         });
 
         card.appendChild(cardHeader);
         card.appendChild(infoEl);
         card.appendChild(listEl);
+        card.appendChild(progBox);
         card.appendChild(btnImport);
 
         container.appendChild(card);
     });
 }
 
-function handleDownloadAndImport(sub, btnElement) {
+function handleDownloadAndImport(sub, btnElement, subCleanId) {
     if (!isAgentConnected) {
         logMessage("Attempting auto-spawn before download...", true);
         ensureAgentRunning();
@@ -670,13 +718,17 @@ function handleDownloadAndImport(sub, btnElement) {
 
     btnElement.disabled = true;
     btnElement.textContent = "⏳ Downloading Tracks & Notes...";
-    logMessage("Triggering download for " + sub.client_name + " via Local Agent...");
+    logMessage("Triggering high-speed download for " + sub.client_name + " via Local Agent...");
+
+    var jobId = "job-" + Date.now();
+    startProgressPolling(jobId, subCleanId || sub.id);
 
     refreshTargetDirectory(function(targetDir) {
         fetch(LOCAL_AGENT_URL + "/download", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+                job_id: jobId,
                 id: sub.id,
                 clientName: sub.client_name,
                 eventDate: sub.event_date,
@@ -714,7 +766,7 @@ function handleDownloadAndImport(sub, btnElement) {
                         } else {
                             logMessage("ExtendScript Error: " + resObj.message, true);
                             btnElement.disabled = false;
-                            btnElement.textContent = "⚠️ Import Retry";
+                            btnElement.textContent = "⚠️ Retry Download";
                         }
                     } catch(ex) {
                         logMessage("Raw ExtendScript Result: " + evalResult);
@@ -729,7 +781,7 @@ function handleDownloadAndImport(sub, btnElement) {
         .catch(function(err) {
             logMessage("Download & Import Error: " + err.message, true);
             btnElement.disabled = false;
-            btnElement.textContent = "📥 Download & Import";
+            btnElement.textContent = "⚠️ Retry Download";
         });
     });
 }

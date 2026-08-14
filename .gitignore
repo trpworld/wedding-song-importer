@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Vercel
+.vercel/
+
+# Environment files & secrets
+.env*.local
+.env
+.env.production
+.env.development
+
+# Python virtual environment & local agent output
+local-agent/venv/
+local-agent/Wedding_Projects/
+Wedding_Projects/
+local-agent/agent.log
+local-agent/*.log
+
+# Audio & media binaries
+*.mp3
+*.wav
+*.m4a
+*.flac
+*.aac
+*.ogg
+
+# OS & system junk
+.DS_Store
+._*
+Thumbs.db

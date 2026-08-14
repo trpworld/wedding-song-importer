@@ -1,0 +1,6 @@
+# Ignore local agent and local audio download folders
+local-agent/
+Wedding_Projects/
+venv/
+._*
+.DS_Store

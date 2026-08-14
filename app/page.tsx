@@ -13,121 +13,126 @@ import {
   Send,
   Sparkles,
   AlertCircle,
-  Clock,
-  Heart,
   Phone,
   FileText,
-  MessageSquareHeart,
-  Info,
-  Edit2,
   Globe,
+  ChevronDown,
+  ChevronUp,
+  Edit2,
+  RotateCcw,
+  Sparkle
 } from 'lucide-react';
 
-interface FormSongTrack {
-  id: string;
-  url: string;
+interface ClientFormProps {
+  studioId?: string;
 }
 
-interface FormRitualCard {
+export interface CustomRitualItem {
   id: string;
-  ritualName: string;
+  name: string;
   englishTag: string;
-  category: string;
-  songs: FormSongTrack[];
-  notes: string;
-  isCollapsed?: boolean;
+  category?: string;
 }
 
+// Translations Object
 const TRANSLATIONS = {
   bn: {
-    headerTitle: 'বিবাহের গান নির্বাচন ফর্ম',
-    headerSubtitle: 'আপনার প্রতিটি শুভ মুহূর্তকে নিখুঁত সঙ্গীতে সাজান',
-    studioTag: 'স্টুডিও আইডি:',
-    langBtn: '🇬🇧 English',
-    coupleSectionTitle: 'বর ও কনের বিবরণ (Couple Information)',
-    coupleNameLabel: 'বরের নাম ও কনের নাম',
-    coupleNamePlaceholder: 'যেমন: রাহুল ও পূজা',
-    eventDateLabel: 'বিয়ের তারিখ (Event Date)',
-    phoneLabel: 'ফোন / হোয়াটসঅ্যাপ নম্বর',
-    phonePlaceholder: 'উদাহরণ: 9876543210',
-    generalNotesLabel: 'সামগ্রিক বিশেষ নির্দেশাবলী (ঐচ্ছিক)',
-    generalNotesPlaceholder: 'সম্পাদকের জন্য আপনার কোনো বিশেষ অনুরোধ বা থিম নোট...',
-    instructionTitle: '📌 নির্দেশনা (Instructions):',
-    instructionStep1: '১. ইউটিউব / স্পোটিফাই বা অডিও লিংকের ইউআরএল কপি করে বক্সে পেস্ট করুন।',
-    instructionStep2: '২. যদি কোনো নির্দিষ্ট সময় থেকে গান বাজাতে চান, টাইমস্ট্যাম্প (যেমন: 01:25) নোটে উল্লেখ করুন।',
-    instructionStep3: '৩. কোনো পর্ব বাদ দিতে চাইলে খালি রাখুন।',
-    preWeddingCategory: '💛 Pre-Wedding Ceremonies (আইবুড়ো ভাত, গায়ে হলুদ & মেহেন্দি)',
-    weddingCategory: '💍 Wedding Ceremony & Rituals (মূল বিবাহ অনুষ্ঠান)',
-    postWeddingCategory: '🌸 Post Wedding & Reception (বিদায়, ভাত কাপড় ও রিসেপশন)',
-    customCategory: '✨ কাস্টম পর্ব (Custom Rituals)',
-    addSongBtn: '+ আরও গান যোগ করুন',
-    notesLabel: '✂️ কাট নোটস / বিশেষ টাইমস্ট্যাম্প (ঐচ্ছিক):',
-    notesPlaceholder: 'যেমন: "০২:১৫ সেকেন্ড থেকে শুরু করুন" অথবা "রিফ্রেন পার্টটা ব্যাকগ্রাউন্ডে দিন"...',
-    addCustomRitualBtn: '➕ নতুন কোনো পর্ব যোগ করুন',
-    customRitualModalTitle: 'নতুন পর্ব যোগ করুন',
-    customRitualNamePlaceholder: 'পর্বের নাম (যেমন: সংগীত নাইট, রিং এক্সচেঞ্জ)',
-    cancelBtn: 'বাতিল',
-    confirmAddBtn: 'যোগ করুন',
-    submitBtn: '✨ গান জমা দিন',
-    submittingBtn: 'জমা দেওয়া হচ্ছে...',
-    addedBadge: 'যুক্ত হয়েছে',
-    editBtn: 'পরিবর্তন',
-    removeBtn: 'গান বাদ দিন',
-    successTitle: 'আপনার গানের তালিকা সফলভাবে সাবমিট হয়েছে! 🎉',
-    successSub: 'ধন্যবাদ! আপনাদের পছন্দের গানগুলো আমাদের Wedding Film Editing টিমের কাছে নিরাপদে পৌঁছে গেছে। ❤️',
-    submitAnotherBtn: '🔄 নতুন ফর্ম জমা দিন',
-    validationError: 'অনুগ্রহ করে বর-কনের নাম এবং অন্তত একটি বৈধ ইউটিউব/অডিও গান যুক্ত করুন।',
+    title: "বিবাহের সঙ্গীত নির্দেশিকা",
+    subtitle: "আপনার স্পেশাল দিনের প্রতিটি মুহূর্তের জন্য পছন্দের গান নির্বাচন করুন",
+    studioLabel: "স্টুডিও:",
+    coupleInfoTitle: "১. দম্পতি ও অনুষ্ঠানের বিবরণ",
+    clientNameLabel: "বরের নাম ও কনের নাম *",
+    clientNamePlaceholder: "উদাঃ রাহুল এবং প্রিয়া",
+    eventDateLabel: "অনুষ্ঠানের তারিখ *",
+    phoneLabel: "ফোন / হোয়াটসঅ্যাপ নম্বর *",
+    phonePlaceholder: "উদাঃ +91 98765 43210",
+    generalNotesLabel: "বিশেষ নির্দেশনা (ঐচ্ছিক)",
+    generalNotesPlaceholder: "সম্পাদনা বা সঙ্গীত প্লেলিস্ট সম্পর্কিত যেকোনো বিশেষ নোট লিখুন...",
+    ritualSectionTitle: "২. শুভ অনুষ্ঠানের গান নির্বাচন (২৪টি আচার)",
+    ritualSectionSubtitle: "প্রতিটি পর্বের জন্য ইউটিউব গান বা অডিও লিংক পেস্ট করুন",
+    phase1Title: "🌿 প্রাক-বিবাহ ও প্রস্তুতি পর্ব (Pre-Wedding & Preparations)",
+    phase2Title: "🌸 মূল বিয়ের দিনের আচার (Wedding Day Rituals)",
+    phase3Title: "🥂 রিসেপশন ও বিদায় পর্ব (Reception & Post-Wedding)",
+    addSongBtn: "+ আরও গান যোগ করুন",
+    urlPlaceholder: "ইউটিউব বা অডিও লিংক পেস্ট করুন (e.g. https://youtu.be/...)",
+    notesPlaceholder: "প্লেলিস্ট টাইমকোড বা স্পেশাল কাট নোট লিখুন (e.g. 01:20 থেকে বাজান)",
+    submitBtn: "✨ সঙ্গীত নির্দেশিকা জমা দিন",
+    submittingBtn: "জমা হচ্ছে...",
+    successTitle: "🎉 অভিনন্দন! আপনার সঙ্গীত প্লেলিস্ট সফলভাবে জমা নেওয়া হয়েছে।",
+    successMsg: "আমাদের এডিটিং টিম খুব শীঘ্রই আপনার নিবেদিত প্লেলিস্ট অনুযায়ী কাজটি শুরু করবে।",
+    submitAnotherBtn: "অন্য নতুন তালিকা জমা দিন",
+    validationError: "অনুগ্রহ করে আপনার নাম, অনুষ্ঠানের তারিখ এবং অন্তত ১টি গানের লিংক পূরণ করুন!",
+    draftRestored: "✨ আপনার পূর্বের খসড়া তথ্য সফলভাবে পুনরুদ্ধার করা হয়েছে!",
+    editBtn: "✏️ পরিবর্তন করুন",
+    removeBtn: "🗑️ বাদ দিন",
+    collapsedSongsAdded: "গান যোগ করা হয়েছে"
   },
   en: {
-    headerTitle: 'Wedding Song Selection Form',
-    headerSubtitle: 'Curate the perfect soundtrack for every special moment of your wedding',
-    studioTag: 'Studio ID:',
-    langBtn: '🇮🇳 বাংলা',
-    coupleSectionTitle: 'Groom & Bride Details',
-    coupleNameLabel: 'Groom & Bride Name',
-    coupleNamePlaceholder: 'e.g. Rahul & Puja',
-    eventDateLabel: 'Event Date',
-    phoneLabel: 'Phone / WhatsApp Number',
-    phonePlaceholder: 'e.g. 9876543210',
-    generalNotesLabel: 'General Special Instructions (Optional)',
-    generalNotesPlaceholder: 'Any general theme notes or specific requests for the editor...',
-    instructionTitle: '📌 Instructions:',
-    instructionStep1: '1. Copy & paste your YouTube / Spotify / Audio link into the box.',
-    instructionStep2: '2. Mention specific timestamps (e.g. 01:25) in notes if needed.',
-    instructionStep3: '3. Leave unneeded ritual boxes empty.',
-    preWeddingCategory: '💛 Pre-Wedding Ceremonies (Aiburobhat, Gaye Holud & Mehendi)',
-    weddingCategory: '💍 Wedding Ceremony & Rituals (Main Marriage Ceremony)',
-    postWeddingCategory: '🌸 Post Wedding & Reception (Biday, Bhat Kapor & Reception Night)',
-    customCategory: '✨ Custom Ceremonies',
-    addSongBtn: '+ Add Another Song',
-    notesLabel: '✂️ Cut Notes / Timestamp Requests (Optional):',
-    notesPlaceholder: 'e.g. "Start from 02:15 timestamp" or "Use instrumental loop in background"...',
-    addCustomRitualBtn: '➕ Add Custom Ritual',
-    customRitualModalTitle: 'Add Custom Ritual',
-    customRitualNamePlaceholder: 'Ritual Name (e.g. Sangeet Night, Ring Exchange)',
-    cancelBtn: 'Cancel',
-    confirmAddBtn: 'Add Ritual',
-    submitBtn: '✨ Submit Playlist',
-    submittingBtn: 'Submitting Playlist...',
-    addedBadge: 'Song Added',
-    editBtn: 'Edit',
-    removeBtn: 'Clear Song',
-    successTitle: 'Your songs have been submitted! 🎉',
-    successSub: 'Thank you! We have received your selected tracks. They will be imported into Premiere Pro as editing begins.',
-    submitAnotherBtn: '🔄 Submit Another Playlist',
-    validationError: 'Please provide Groom & Bride Name and at least one valid song link.',
-  },
+    title: "Wedding Soundtrack Guide",
+    subtitle: "Select your favorite tracks for every precious moment of your special day",
+    studioLabel: "Studio:",
+    coupleInfoTitle: "1. Couple & Event Information",
+    clientNameLabel: "Groom & Bride Names *",
+    clientNamePlaceholder: "e.g. Rahul & Priya",
+    eventDateLabel: "Wedding Event Date *",
+    phoneLabel: "Phone / WhatsApp Number *",
+    phonePlaceholder: "e.g. +91 98765 43210",
+    generalNotesLabel: "Special Editing Instructions (Optional)",
+    generalNotesPlaceholder: "Any general notes or style instructions for the editor...",
+    ritualSectionTitle: "2. Wedding Ritual Soundtrack Selection",
+    ritualSectionSubtitle: "Paste YouTube or audio link for each ritual section",
+    phase1Title: "🌿 Phase 1: Pre-Wedding & Preparations",
+    phase2Title: "🌸 Phase 2: Wedding Day Rituals",
+    phase3Title: "🥂 Phase 3: Reception & Post-Wedding",
+    addSongBtn: "+ Add Another Track",
+    urlPlaceholder: "Paste YouTube or Audio Link (e.g. https://youtu.be/...)",
+    notesPlaceholder: "Timing instructions or cut notes (e.g. Start at 01:20)",
+    submitBtn: "✨ Submit Soundtrack Guide",
+    submittingBtn: "Submitting...",
+    successTitle: "🎉 Success! Your Wedding Soundtrack Guide is Submitted.",
+    successMsg: "Our editing team will organize and import your tracks into Premiere Pro.",
+    submitAnotherBtn: "Submit Another Form",
+    validationError: "Please fill in Couple Names, Event Date, and at least 1 Song URL!",
+    draftRestored: "✨ Your saved draft information has been restored!",
+    editBtn: "✏️ Edit",
+    removeBtn: "🗑️ Remove",
+    collapsedSongsAdded: "Song(s) Added"
+  }
 };
 
-export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studioId?: string } = {}) {
+export default function ClientForm({ studioId = 'trpworld' }: ClientFormProps) {
   const [lang, setLang] = useState<'bn' | 'en'>('bn');
+
+  // Form States
+  const [clientName, setClientName] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [phone, setPhone] = useState('');
+  const [generalNotes, setGeneralNotes] = useState('');
+  const [ritualSongs, setRitualSongs] = useState<Record<string, SongItem[]>>({});
+
+  // Dynamic Studio Template & Rituals
+  const [activeRituals, setActiveRituals] = useState<CustomRitualItem[]>([]);
+
+  // Accordion & Collapse States
+  const [collapsedCards, setCollapsedCards] = useState<Record<string, boolean>>({});
+  const [phaseCollapsed, setPhaseCollapsed] = useState<Record<string, boolean>>({
+    phase1: false,
+    phase2: false,
+    phase3: false
+  });
+
+  // UI Flow States
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showDraftRestoredToast, setShowDraftRestoredToast] = useState(false);
+
   const t = TRANSLATIONS[lang];
 
+  // 1. Language Preference Hydration
   useEffect(() => {
-    const savedLang = localStorage.getItem('wedding_form_lang');
-    if (savedLang === 'en' || savedLang === 'bn') {
-      setLang(savedLang);
-    }
+    const savedLang = localStorage.getItem('wedding_form_lang') as 'bn' | 'en';
+    if (savedLang) setLang(savedLang);
   }, []);
 
   const toggleLanguage = () => {
@@ -136,233 +141,163 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
     localStorage.setItem('wedding_form_lang', nextLang);
   };
 
-  const [clientName, setClientName] = useState('');
-  const [eventDate, setEventDate] = useState('');
-  const [phone, setPhone] = useState('');
-  const [generalNotes, setGeneralNotes] = useState('');
-
-  // Initialize form state with default rituals
-  const [rituals, setRituals] = useState<FormRitualCard[]>(() =>
-    BENGALI_RITUAL_GROUPS.flatMap((group) =>
-      group.rituals.map((r) => ({
-        id: `ritual-${r.id}`,
-        ritualName: r.name,
-        englishTag: r.englishTag,
-        category: r.category,
-        songs: [{ id: `song-${r.id}-1`, url: '' }],
-        notes: '',
-        isCollapsed: false,
-      }))
-    )
-  );
-
+  // 2. Fetch Custom Studio Template or Fallback
   useEffect(() => {
-    async function loadStudioTemplate() {
+    async function loadTemplate() {
       try {
         const res = await fetch(`/api/templates?studioId=${encodeURIComponent(studioId)}`);
         const json = await res.json();
         if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          const customCards: FormRitualCard[] = json.data.map((r: any, idx: number) => ({
-            id: `ritual-custom-${r.id || idx}`,
-            ritualName: r.name,
-            englishTag: r.englishTag || 'Custom',
-            category: r.category || 'wedding_ceremony',
-            songs: [{ id: `song-custom-${r.id || idx}-1`, url: '' }],
-            notes: '',
-            isCollapsed: false,
-          }));
-          setRituals(customCards);
+          setActiveRituals(json.data);
+          return;
         }
-      } catch (e) {
-        console.error('Error fetching studio template:', e);
-      }
+      } catch (e) {}
+
+      // Default 24 Bengali Rituals Fallback
+      const defaultList: CustomRitualItem[] = BENGALI_RITUAL_GROUPS.flatMap((g, gIdx) =>
+        g.rituals.map((r, rIdx) => ({
+          id: `r-${gIdx}-${rIdx}`,
+          name: r.name,
+          englishTag: r.englishTag,
+          category: g.id
+        }))
+      );
+      setActiveRituals(defaultList);
     }
-    loadStudioTemplate();
+    loadTemplate();
   }, [studioId]);
 
-  const [customRitualName, setCustomRitualName] = useState('');
-  const [showAddRitualModal, setShowAddRitualModal] = useState(false);
+  // 3. STEP 1: Auto-Draft Persistence (localStorage Hydration)
+  const DRAFT_KEY = `wedding_form_draft_${studioId || 'default'}`;
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [clipboardNotice, setClipboardNotice] = useState<string | null>(null);
-
-  // Validate URL pattern
-  const isValidUrl = (url: string) => {
-    if (!url.trim()) return false;
+  useEffect(() => {
     try {
-      const parsed = new URL(url.trim());
-      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-    } catch {
-      return false;
+      const savedDraft = localStorage.getItem(DRAFT_KEY);
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        if (parsed.clientName) setClientName(parsed.clientName);
+        if (parsed.eventDate) setEventDate(parsed.eventDate);
+        if (parsed.phone) setPhone(parsed.phone);
+        if (parsed.generalNotes) setGeneralNotes(parsed.generalNotes);
+        if (parsed.ritualSongs && typeof parsed.ritualSongs === 'object') {
+          setRitualSongs(parsed.ritualSongs);
+          
+          // Auto-collapse cards that already have valid URLs
+          const newCollapsed: Record<string, boolean> = {};
+          Object.entries(parsed.ritualSongs).forEach(([rName, songArr]) => {
+            const list = songArr as SongItem[];
+            if (list.some(s => s.url && s.url.trim().length > 0)) {
+              newCollapsed[rName] = true;
+            }
+          });
+          setCollapsedCards(newCollapsed);
+        }
+        setShowDraftRestoredToast(true);
+        setTimeout(() => setShowDraftRestoredToast(false), 4500);
+      }
+    } catch (e) {}
+  }, [studioId, DRAFT_KEY]);
+
+  // Auto-save state on change
+  useEffect(() => {
+    if (submitted) return;
+    try {
+      const draftPayload = {
+        clientName,
+        eventDate,
+        phone,
+        generalNotes,
+        ritualSongs
+      };
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draftPayload));
+    } catch (e) {}
+  }, [clientName, eventDate, phone, generalNotes, ritualSongs, DRAFT_KEY, submitted]);
+
+  // Helpers for Song Items
+  const getSongsForRitual = (ritualName: string): SongItem[] => {
+    return ritualSongs[ritualName] || [{ ritualName, url: '', notes: '' }];
+  };
+
+  const updateSong = (ritualName: string, index: number, field: 'url' | 'notes', value: string) => {
+    const current = [...getSongsForRitual(ritualName)];
+    if (!current[index]) {
+      current[index] = { ritualName, url: '', notes: '' };
+    }
+    current[index][field] = value;
+
+    setRitualSongs(prev => ({ ...prev, [ritualName]: current }));
+
+    // STEP 3: Smart Auto-Collapse on valid paste
+    if (field === 'url' && value.trim().length > 10) {
+      setCollapsedCards(prev => ({ ...prev, [ritualName]: true }));
     }
   };
 
-  // Handle URL change with smart auto-collapsing
-  const handleUrlChange = (ritualId: string, songId: string, url: string) => {
-    const trimmed = url.trim();
-    const isUrlValid = isValidUrl(trimmed);
-
-    setRituals((prev) =>
-      prev.map((card) => {
-        if (card.id === ritualId) {
-          const updatedSongs = card.songs.map((s) => (s.id === songId ? { ...s, url } : s));
-          return {
-            ...card,
-            songs: updatedSongs,
-            isCollapsed: isUrlValid ? true : card.isCollapsed,
-          };
-        }
-        return card;
-      })
-    );
+  const addSongField = (ritualName: string) => {
+    const current = [...getSongsForRitual(ritualName)];
+    current.push({ ritualName, url: '', notes: '' });
+    setRitualSongs(prev => ({ ...prev, [ritualName]: current }));
+    setCollapsedCards(prev => ({ ...prev, [ritualName]: false }));
   };
 
-  // Handle Paste from Clipboard
-  const handlePaste = async (ritualId: string, songId: string) => {
-    setClipboardNotice(null);
-    try {
-      if (!navigator.clipboard || !navigator.clipboard.readText) {
-        setClipboardNotice('Clipboard read not supported. Please paste manually.');
-        return;
-      }
-      const text = await navigator.clipboard.readText();
-      if (text) {
-        handleUrlChange(ritualId, songId, text.trim());
-      }
-    } catch (err) {
-      console.warn('Clipboard permission error:', err);
-      setClipboardNotice('Clipboard access denied. Please paste manually.');
+  const removeSongField = (ritualName: string, index: number) => {
+    const current = [...getSongsForRitual(ritualName)];
+    current.splice(index, 1);
+    const updated = current.length === 0 ? [{ ritualName, url: '', notes: '' }] : current;
+    setRitualSongs(prev => ({ ...prev, [ritualName]: updated }));
+    
+    if (!updated.some(s => s.url.trim().length > 0)) {
+      setCollapsedCards(prev => ({ ...prev, [ritualName]: false }));
     }
   };
 
-  // Add another song to a ritual card
-  const handleAddSongToRitual = (ritualId: string) => {
-    setRituals((prev) =>
-      prev.map((card) => {
-        if (card.id === ritualId) {
-          return {
-            ...card,
-            songs: [...card.songs, { id: `song-${Date.now()}-${card.songs.length + 1}`, url: '' }],
-            isCollapsed: false,
-          };
-        }
-        return card;
-      })
-    );
+  const clearRitualSongs = (ritualName: string) => {
+    setRitualSongs(prev => ({ ...prev, [ritualName]: [{ ritualName, url: '', notes: '' }] }));
+    setCollapsedCards(prev => ({ ...prev, [ritualName]: false }));
   };
 
-  // Remove a song from a ritual card
-  const handleRemoveSongFromRitual = (ritualId: string, songId: string) => {
-    setRituals((prev) =>
-      prev.map((card) => {
-        if (card.id === ritualId && card.songs.length > 1) {
-          const filtered = card.songs.filter((s) => s.id !== songId);
-          const hasRemainingValidSong = filtered.some((s) => isValidUrl(s.url));
-          return {
-            ...card,
-            songs: filtered,
-            isCollapsed: hasRemainingValidSong,
-          };
-        }
-        return card;
-      })
-    );
+  const toggleCardCollapse = (ritualName: string) => {
+    setCollapsedCards(prev => ({ ...prev, [ritualName]: !prev[ritualName] }));
   };
 
-  // Handle Notes change
-  const handleNotesChange = (ritualId: string, notes: string) => {
-    setRituals((prev) =>
-      prev.map((card) => (card.id === ritualId ? { ...card, notes } : card))
-    );
+  const togglePhaseCollapse = (phaseKey: string) => {
+    setPhaseCollapsed(prev => ({ ...prev, [phaseKey]: !prev[phaseKey] }));
   };
 
-  // Edit Control (Expands collapsed card)
-  const handleEditCard = (ritualId: string) => {
-    setRituals((prev) =>
-      prev.map((card) => (card.id === ritualId ? { ...card, isCollapsed: false } : card))
-    );
+  // Divide active rituals into 3 Phases
+  const phase1Rituals = activeRituals.slice(0, 8);
+  const phase2Rituals = activeRituals.slice(8, 17);
+  const phase3Rituals = activeRituals.slice(17);
+
+  const getPhaseSongCount = (ritualList: CustomRitualItem[]) => {
+    return ritualList.reduce((acc, r) => {
+      const songs = ritualSongs[r.name] || [];
+      return acc + songs.filter(s => s.url && s.url.trim().length > 0).length;
+    }, 0);
   };
 
-  // Clear / Remove Control (Resets card and expands)
-  const handleClearCard = (ritualId: string) => {
-    setRituals((prev) =>
-      prev.map((card) => {
-        if (card.id === ritualId) {
-          return {
-            ...card,
-            songs: [{ id: `song-${card.id}-reset`, url: '' }],
-            notes: '',
-            isCollapsed: false,
-          };
-        }
-        return card;
-      })
-    );
-  };
-
-  // Delete custom ritual card
-  const handleDeleteRitual = (ritualId: string) => {
-    setRituals((prev) => prev.filter((card) => card.id !== ritualId));
-  };
-
-  // Add custom ritual card
-  const handleAddCustomRitual = () => {
-    if (!customRitualName.trim()) return;
-    const newCard: FormRitualCard = {
-      id: `custom-${Date.now()}`,
-      ritualName: `✨ ${customRitualName.trim()}`,
-      englishTag: customRitualName.trim(),
-      category: 'post_wedding_reception',
-      songs: [{ id: `song-custom-${Date.now()}`, url: '' }],
-      notes: '',
-      isCollapsed: false,
-    };
-    setRituals((prev) => [...prev, newCard]);
-    setCustomRitualName('');
-    setShowAddRitualModal(false);
-  };
-
-  // Calculate total valid songs filled across all rituals
-  const totalValidSongs = rituals.reduce((acc, card) => {
-    return acc + card.songs.filter((s) => isValidUrl(s.url)).length;
-  }, 0);
-
-  // Submit Handler
+  // Submission Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage(null);
+    setErrorMessage('');
 
-    if (!clientName.trim()) {
-      setErrorMessage(t.validationError);
-      return;
-    }
-    if (!eventDate) {
-      setErrorMessage(t.validationError);
-      return;
-    }
+    const formattedSongs: Array<{ ritualName: string; url: string; notes: string }> = [];
 
-    const validSongsPayload: SongItem[] = [];
-
-    rituals.forEach((card) => {
-      const validTracks = card.songs.filter((s) => isValidUrl(s.url));
-      validTracks.forEach((track, index) => {
-        const trackTitle =
-          validTracks.length > 1
-            ? `${card.ritualName} (Track ${index + 1})`
-            : card.ritualName;
-
-        validSongsPayload.push({
-          ritualName: trackTitle,
-          url: track.url.trim(),
-          notes: card.notes.trim(),
-        });
+    Object.entries(ritualSongs).forEach(([rName, sList]) => {
+      sList.forEach(s => {
+        if (s.url && s.url.trim().length > 0) {
+          formattedSongs.push({
+            ritualName: rName,
+            url: s.url.trim(),
+            notes: s.notes ? s.notes.trim() : ''
+          });
+        }
       });
     });
 
-    if (validSongsPayload.length === 0) {
+    if (!clientName.trim() || !eventDate.trim() || formattedSongs.length === 0) {
       setErrorMessage(t.validationError);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
@@ -375,471 +310,438 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
         body: JSON.stringify({
           studio_id: studioId,
           client_name: clientName.trim(),
-          event_date: eventDate,
+          event_date: eventDate.trim(),
           phone: phone.trim(),
           general_notes: generalNotes.trim(),
-          songs: validSongsPayload,
-        }),
+          songs: formattedSongs
+        })
       });
 
-      const json = await res.json();
+      const data = await res.json();
 
-      if (!json.success) {
-        throw new Error(json.error || 'Failed to submit playlist');
+      if (data.success) {
+        setSubmitted(true);
+        // Clear saved draft on successful submit
+        localStorage.removeItem(DRAFT_KEY);
+      } else {
+        setErrorMessage(data.error || 'Failed to submit playlist');
       }
-
-      setIsSubmitted(true);
     } catch (err: any) {
-      console.error('Submission error:', err);
-      setErrorMessage(err.message || 'An error occurred while submitting.');
+      setErrorMessage('Connection error: ' + err.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Format Display Title depending on Language
-  const getRitualDisplayTitle = (card: FormRitualCard) => {
-    if (lang === 'en') {
-      return card.englishTag || card.ritualName;
-    }
-    return card.ritualName;
+  const handleResetForm = () => {
+    setClientName('');
+    setEventDate('');
+    setPhone('');
+    setGeneralNotes('');
+    setRitualSongs({});
+    setCollapsedCards({});
+    setSubmitted(false);
+    localStorage.removeItem(DRAFT_KEY);
   };
 
-  // Success Confirmation Screen
-  if (isSubmitted) {
+  // SUCCESS SCREEN
+  if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[75vh] text-center px-4 py-8">
-        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-2 border-emerald-500/50 flex items-center justify-center text-emerald-400 mb-6 animate-bounce shadow-2xl">
-          <CheckCircle2 className="w-12 h-12" />
-        </div>
-
-        <h1 className="font-serif text-3xl sm:text-4xl font-bold gradient-text mb-3">
-          {t.successTitle}
-        </h1>
-        <p className="text-slate-300 max-w-lg mb-6 text-sm sm:text-base leading-relaxed">
-          {t.successSub}
-        </p>
-
-        <div className="glass-card p-6 rounded-2xl max-w-md w-full mb-8 text-left border-amber-500/30 shadow-xl space-y-3">
-          <h3 className="text-xs uppercase tracking-wider text-amber-400 font-semibold pb-2 border-b border-white/10 flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-amber-400" /> Summary
-          </h3>
-          <div className="space-y-2 text-sm text-slate-300">
-            <p className="flex justify-between">
-              <span className="text-slate-400">{t.coupleNameLabel}:</span>
-              <strong className="text-white font-medium">{clientName}</strong>
-            </p>
-            <p className="flex justify-between">
-              <span className="text-slate-400">{t.eventDateLabel}:</span>
-              <strong className="text-white font-medium">{eventDate}</strong>
-            </p>
-            {phone && (
-              <p className="flex justify-between">
-                <span className="text-slate-400">{t.phoneLabel}:</span>
-                <strong className="text-amber-300 font-medium">{phone}</strong>
-              </p>
-            )}
-            <p className="flex justify-between items-center">
-              <span className="text-slate-400">Total Songs Submitted:</span>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs border border-emerald-500/30">
-                {totalValidSongs} Tracks
-              </span>
-            </p>
+      <div className="min-h-screen bg-[#0D0E12] text-white flex items-center justify-center p-4">
+        <div className="max-w-xl w-full bg-[#161820] border border-[#F472B6]/30 rounded-2xl p-8 shadow-2xl text-center backdrop-blur-xl">
+          <div className="w-20 h-20 bg-gradient-to-tr from-[#F472B6] to-[#E11D48] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-[#F472B6]/20">
+            <CheckCircle2 className="w-10 h-10 text-white" />
           </div>
+          <h2 className="text-2xl font-bold text-white mb-3">{t.successTitle}</h2>
+          <p className="text-[#E2E8F0] mb-6 text-sm leading-relaxed">{t.successMsg}</p>
+          <button
+            onClick={handleResetForm}
+            className="w-full min-h-[48px] py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#F472B6] to-[#E11D48] hover:from-[#FB7185] hover:to-[#F472B6] text-white font-bold transition-all duration-200 shadow-lg shadow-[#F472B6]/25 flex items-center justify-center gap-2"
+          >
+            <RotateCcw className="w-4 h-4" />
+            {t.submitAnotherBtn}
+          </button>
         </div>
-
-        <button
-          onClick={() => {
-            setIsSubmitted(false);
-            setClientName('');
-            setEventDate('');
-            setPhone('');
-            setGeneralNotes('');
-            setRituals(
-              BENGALI_RITUAL_GROUPS.flatMap((group) =>
-                group.rituals.map((r) => ({
-                  id: `ritual-${r.id}`,
-                  ritualName: r.name,
-                  englishTag: r.englishTag,
-                  category: r.category,
-                  songs: [{ id: `song-${r.id}-1`, url: '' }],
-                  notes: '',
-                  isCollapsed: false,
-                }))
-              )
-            );
-          }}
-          className="px-6 py-3 rounded-xl font-medium bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all shadow-lg hover:scale-105"
-        >
-          {t.submitAnotherBtn}
-        </button>
       </div>
     );
   }
 
-  // Render Ritual Section Cards
-  const renderRitualsGroup = (categoryKey: string, categoryTitle: string) => {
-    const categoryRituals = rituals.filter((r) => r.category === categoryKey);
-    if (categoryRituals.length === 0) return null;
+  // RENDER RITUAL CARD COMPONENT
+  const renderRitualCard = (ritual: CustomRitualItem) => {
+    const songs = getSongsForRitual(ritual.name);
+    const validSongs = songs.filter(s => s.url && s.url.trim().length > 0);
+    const isCollapsed = collapsedCards[ritual.name] && validSongs.length > 0;
 
     return (
-      <div className="space-y-4">
-        <h2 className="font-serif text-lg sm:text-xl font-semibold text-amber-300 pb-2 border-b border-amber-500/20 flex items-center justify-between">
-          <span>{categoryTitle}</span>
-          <span className="text-xs font-normal text-slate-400">
-            ({categoryRituals.filter((r) => r.songs.some((s) => isValidUrl(s.url))).length} / {categoryRituals.length} Filled)
-          </span>
-        </h2>
-
-        <div className="space-y-3">
-          {categoryRituals.map((card) => {
-            const validTracks = card.songs.filter((s) => isValidUrl(s.url));
-            const hasValidSong = validTracks.length > 0;
-            const isCollapsed = card.isCollapsed && hasValidSong;
-
-            if (isCollapsed) {
-              // Collapsed Slim Summary Bar
-              return (
-                <div
-                  key={card.id}
-                  className="glass-card p-4 rounded-xl border-emerald-500/40 bg-emerald-950/10 flex items-center justify-between gap-3 shadow-md hover:border-emerald-500/60 transition-all"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
-                      <CheckCircle2 className="w-4 h-4" />
-                    </div>
-
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-medium text-sm text-white truncate">
-                          {getRitualDisplayTitle(card)}
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[10px] border border-emerald-500/30">
-                          {t.addedBadge} ({validTracks.length})
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-400 truncate max-w-sm sm:max-w-md">
-                        {validTracks[0]?.url}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => handleEditCard(card.id)}
-                      className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-medium transition-all flex items-center gap-1"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                      <span>{t.editBtn}</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleClearCard(card.id)}
-                      className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-medium transition-all flex items-center gap-1"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>{t.removeBtn}</span>
-                    </button>
-                  </div>
-                </div>
-              );
-            }
-
-            // Expanded Card View
-            return (
-              <div
-                key={card.id}
-                className={`glass-card p-5 sm:p-6 rounded-2xl border-white/10 transition-all ${
-                  hasValidSong ? 'border-amber-500/40 bg-amber-950/5' : ''
-                }`}
+      <div
+        key={ritual.id}
+        className={`bg-[#161820] border rounded-xl transition-all duration-200 ${
+          validSongs.length > 0
+            ? 'border-[#F472B6]/40 shadow-md shadow-[#F472B6]/5'
+            : 'border-[#2A2D3A] hover:border-[#F472B6]/25'
+        }`}
+      >
+        {/* COLLAPSED SLIM CARD VIEW */}
+        {isCollapsed ? (
+          <div
+            onClick={() => toggleCardCollapse(ritual.name)}
+            className="p-4 flex items-center justify-between cursor-pointer hover:bg-[#1E212D]/60 transition-colors rounded-xl"
+          >
+            <div className="flex items-center gap-3">
+              <span className="w-7 h-7 rounded-lg bg-[#F472B6]/15 border border-[#F472B6]/30 flex items-center justify-center text-[#F472B6] text-xs font-bold">
+                ✓
+              </span>
+              <div>
+                <h4 className="text-white font-bold text-sm tracking-wide">{ritual.name}</h4>
+                <p className="text-[#94A3B8] text-xs truncate max-w-xs sm:max-w-md">
+                  {validSongs[0].url}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="bg-[#F472B6]/15 text-[#F472B6] border border-[#F472B6]/30 text-[11px] font-semibold px-2.5 py-1 rounded-full">
+                ✅ {validSongs.length} {t.collapsedSongsAdded}
+              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleCardCollapse(ritual.name);
+                }}
+                className="text-[#E2E8F0] hover:text-[#F472B6] p-1.5 rounded-lg hover:bg-[#2A2D3A] transition-colors text-xs flex items-center gap-1"
               >
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <h3 className="font-medium text-sm sm:text-base text-white flex items-center gap-2">
-                    <Music className="w-4 h-4 text-amber-400 shrink-0" />
-                    <span>{getRitualDisplayTitle(card)}</span>
-                  </h3>
-                  {card.id.startsWith('custom-') && (
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteRitual(card.id)}
-                      className="text-xs text-rose-400 hover:text-rose-300 transition-colors flex items-center gap-1"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
+                <Edit2 className="w-3.5 h-3.5" />
+                {t.editBtn}
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clearRitualSongs(ritual.name);
+                }}
+                className="text-[#94A3B8] hover:text-[#FB7185] p-1.5 rounded-lg hover:bg-[#2A2D3A] transition-colors text-xs flex items-center gap-1"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* EXPANDED CARD VIEW */
+          <div className="p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-3 border-b border-[#2A2D3A] pb-3">
+              <div>
+                <h4 className="text-white font-bold text-base flex items-center gap-2">
+                  <Music className="w-4 h-4 text-[#F472B6]" />
+                  {ritual.name}
+                </h4>
+                {ritual.englishTag && (
+                  <span className="text-[#94A3B8] text-xs italic">
+                    ({ritual.englishTag})
+                  </span>
+                )}
+              </div>
 
-                <div className="space-y-3">
-                  {card.songs.map((songTrack, index) => (
-                    <div key={songTrack.id} className="flex items-center gap-2">
-                      <div className="relative flex-1">
-                        <input
-                          type="url"
-                          placeholder="https://www.youtube.com/watch?v=..."
-                          value={songTrack.url}
-                          onChange={(e) => handleUrlChange(card.id, songTrack.id, e.target.value)}
-                          className="w-full px-4 py-2.5 pr-20 rounded-xl glass-input text-xs sm:text-sm placeholder:text-slate-500"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handlePaste(card.id, songTrack.id)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-[11px] font-medium transition-all flex items-center gap-1"
-                        >
-                          <Clipboard className="w-3 h-3" />
-                          <span>Paste</span>
-                        </button>
-                      </div>
+              {validSongs.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => toggleCardCollapse(ritual.name)}
+                  className="text-xs text-[#F472B6] hover:text-[#FB7185] font-semibold bg-[#F472B6]/10 px-2.5 py-1 rounded-lg border border-[#F472B6]/20 flex items-center gap-1"
+                >
+                  <ChevronUp className="w-3.5 h-3.5" />
+                  Collapse
+                </button>
+              )}
+            </div>
 
-                      {card.songs.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveSongFromRitual(card.id, songTrack.id)}
-                          className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all shrink-0"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-
-                  <div className="flex items-center justify-between pt-1">
-                    <button
-                      type="button"
-                      onClick={() => handleAddSongToRitual(card.id)}
-                      className="text-xs text-amber-400 hover:text-amber-300 font-medium transition-colors flex items-center gap-1"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>{t.addSongBtn}</span>
-                    </button>
-                  </div>
-
-                  {/* Cut Notes Field */}
-                  <div className="pt-2 border-t border-white/5">
-                    <label className="block text-[11px] font-medium text-slate-400 mb-1">
-                      {t.notesLabel}
-                    </label>
+            <div className="space-y-3">
+              {songs.map((song, sIdx) => (
+                <div key={sIdx} className="bg-[#1E212D] border border-[#2A2D3A] p-3 rounded-xl space-y-2.5">
+                  <div className="flex items-center gap-2">
                     <input
                       type="text"
-                      placeholder={t.notesPlaceholder}
-                      value={card.notes}
-                      onChange={(e) => handleNotesChange(card.id, e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg glass-input text-xs placeholder:text-slate-600"
+                      value={song.url}
+                      onChange={(e) => updateSong(ritual.name, sIdx, 'url', e.target.value)}
+                      placeholder={t.urlPlaceholder}
+                      className="flex-1 bg-[#13151D] border border-[#333748] focus:border-[#F472B6] text-white text-sm px-3.5 py-2.5 rounded-lg outline-none transition-all duration-200 placeholder:text-[#94A3B8] min-h-[44px]"
                     />
+                    {songs.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeSongField(ritual.name, sIdx)}
+                        className="text-[#94A3B8] hover:text-[#FB7185] p-2.5 rounded-lg hover:bg-[#2A2D3A] transition-colors"
+                        title="Remove track"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
+                  <input
+                    type="text"
+                    value={song.notes}
+                    onChange={(e) => updateSong(ritual.name, sIdx, 'notes', e.target.value)}
+                    placeholder={t.notesPlaceholder}
+                    className="w-full bg-[#13151D] border border-[#333748] focus:border-[#F472B6] text-[#E2E8F0] text-xs px-3.5 py-2 rounded-lg outline-none transition-all duration-200 placeholder:text-[#94A3B8]"
+                  />
                 </div>
+              ))}
+
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={() => addSongField(ritual.name)}
+                  className="text-xs font-semibold text-[#F472B6] hover:text-[#FB7185] flex items-center gap-1.5 py-1 px-2 rounded-lg hover:bg-[#F472B6]/10 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  {t.addSongBtn}
+                </button>
+
+                {validSongs.length > 0 && (
+                  <span className="text-[11px] text-[#F59E0B] font-medium">
+                    🎵 {validSongs.length} track(s) ready
+                  </span>
+                )}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
 
   return (
-    <div className="pb-32 space-y-8 max-w-4xl mx-auto px-3 sm:px-6 pt-4">
-      {/* Top Header & Language Switcher */}
-      <div className="glass-card p-6 sm:p-8 rounded-3xl border-amber-500/30 relative overflow-hidden text-center sm:text-left shadow-2xl">
-        <div className="absolute -top-16 -right-16 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-amber-500/20 border border-amber-500/40 text-xs font-semibold text-amber-300 shadow-sm">
-            <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-            <span>{t.studioTag} <strong className="text-white font-bold">{studioId}</strong></span>
-          </div>
-
-          {/* Language Toggle Button */}
-          <button
-            type="button"
-            onClick={toggleLanguage}
-            className="px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-medium text-xs transition-all shadow-md flex items-center gap-1.5 hover:scale-105 active:scale-95"
-          >
-            <Globe className="w-3.5 h-3.5 text-amber-400" />
-            <span>{t.langBtn}</span>
-          </button>
-        </div>
-
-        <h1 className="font-serif text-2xl sm:text-4xl font-bold gradient-text tracking-tight mb-3">
-          🎬 {t.headerTitle}
-        </h1>
-
-        <p className="text-slate-200 text-sm sm:text-base leading-relaxed mb-4">
-          {t.headerSubtitle} ❤️
-        </p>
-
-        {/* Instructions Banner */}
-        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs sm:text-sm space-y-1.5 text-left">
-          <div className="font-semibold text-amber-300 flex items-center gap-1.5 text-sm">
-            <Info className="w-4 h-4 shrink-0 text-amber-400" />
-            <span>{t.instructionTitle}</span>
-          </div>
-          <ul className="space-y-1 text-slate-300 text-xs sm:text-sm leading-relaxed pl-1">
-            <li>{t.instructionStep1}</li>
-            <li>{t.instructionStep2}</li>
-            <li>{t.instructionStep3}</li>
-          </ul>
-        </div>
-      </div>
-
-      {clipboardNotice && (
-        <div className="p-3 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{clipboardNotice}</span>
+    <div className="min-h-screen bg-[#0D0E12] text-white py-8 px-4 sm:px-6 lg:px-8 font-sans selection:bg-[#F472B6]/30 selection:text-white">
+      {/* FLOATING TOAST FOR DRAFT RESTORATION */}
+      {showDraftRestoredToast && (
+        <div className="fixed top-5 right-5 z-50 bg-[#161820] border border-[#F472B6] text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 animate-bounce">
+          <Sparkles className="w-5 h-5 text-[#F472B6]" />
+          <span className="text-xs font-semibold">{t.draftRestored}</span>
         </div>
       )}
 
-      {errorMessage && (
-        <div className="p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs sm:text-sm flex items-center gap-2 animate-shake">
-          <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
-
-      {/* Main Submission Form */}
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Couple Information Section */}
-        <div className="glass-card p-5 sm:p-6 rounded-2xl border-white/10 relative">
-          <h2 className="font-serif text-lg sm:text-xl font-semibold text-amber-200 mb-4 flex items-center gap-2">
-            <User className="w-5 h-5 text-amber-400" /> {t.coupleSectionTitle}
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-amber-400" /> {t.coupleNameLabel} <span className="text-rose-400">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                placeholder={t.coupleNamePlaceholder}
-                value={clientName}
-                onChange={(e) => setClientName(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl glass-input text-sm placeholder:text-slate-500"
-              />
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* HEADER BAR & LANGUAGE SWITCHER */}
+        <header className="bg-[#161820] border border-[#F472B6]/20 rounded-2xl p-6 shadow-xl backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4 text-center sm:text-left">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#F472B6] to-[#E11D48] flex items-center justify-center shadow-lg shadow-[#F472B6]/20">
+              <Music className="w-6 h-6 text-white" />
             </div>
-
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-amber-400" /> {t.eventDateLabel} <span className="text-rose-400">*</span>
-              </label>
-              <input
-                type="date"
-                required
-                value={eventDate}
-                onChange={(e) => setEventDate(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl glass-input text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1.5">
-                <Phone className="w-3.5 h-3.5 text-amber-400" /> {t.phoneLabel} <span className="text-rose-400">*</span>
-              </label>
-              <input
-                type="tel"
-                required
-                placeholder={t.phonePlaceholder}
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl glass-input text-sm placeholder:text-slate-500"
-              />
+              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2 justify-center sm:justify-start">
+                {t.title}
+              </h1>
+              <p className="text-xs sm:text-sm text-[#E2E8F0] mt-0.5">{t.subtitle}</p>
             </div>
           </div>
 
-          <div className="mt-4">
-            <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-amber-400" /> {t.generalNotesLabel}
-            </label>
-            <textarea
-              rows={2}
-              placeholder={t.generalNotesPlaceholder}
-              value={generalNotes}
-              onChange={(e) => setGeneralNotes(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl glass-input text-xs sm:text-sm placeholder:text-slate-500 resize-none"
-            />
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold text-[#F59E0B] bg-[#F59E0B]/10 border border-[#F59E0B]/30 px-3 py-1.5 rounded-full">
+              {t.studioLabel} {studioId}
+            </span>
+
+            {/* BILINGUAL LANGUAGE SWITCHER TOGGLE */}
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-2 bg-[#1E212D] border border-[#F472B6]/40 hover:border-[#F472B6] text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-all duration-200 shadow-md min-h-[44px]"
+            >
+              <Globe className="w-4 h-4 text-[#F472B6]" />
+              {lang === 'bn' ? '🇮🇳 বাংলা' : '🇬🇧 English'}
+            </button>
           </div>
-        </div>
+        </header>
 
-        {/* Ritual Categories */}
-        {renderRitualsGroup('pre_wedding', t.preWeddingCategory)}
-        {renderRitualsGroup('wedding_ceremony', t.weddingCategory)}
-        {renderRitualsGroup('post_wedding_reception', t.postWeddingCategory)}
+        {/* ERROR MESSAGE ALERT */}
+        {errorMessage && (
+          <div className="bg-[#E11D48]/15 border border-[#E11D48]/40 rounded-xl p-4 text-[#FB7185] text-xs sm:text-sm flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
 
-        {/* Add Custom Ritual Button */}
-        <div className="flex justify-center pt-2">
-          <button
-            type="button"
-            onClick={() => setShowAddRitualModal(true)}
-            className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/20 text-amber-300 font-medium text-xs sm:text-sm transition-all shadow-md flex items-center gap-2 hover:scale-105"
-          >
-            <span>{t.addCustomRitualBtn}</span>
-          </button>
-        </div>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* SECTION 1: COUPLE & EVENT INFORMATION */}
+          <section className="bg-[#161820] border border-[#F472B6]/20 rounded-2xl p-6 shadow-xl space-y-5">
+            <h2 className="text-lg font-bold text-white flex items-center gap-2 border-b border-[#2A2D3A] pb-3">
+              <User className="w-5 h-5 text-[#F472B6]" />
+              {t.coupleInfoTitle}
+            </h2>
 
-        {/* Submit Floating Action Bar */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-950/80 backdrop-blur-xl border-t border-white/10 z-40">
-          <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-            <div>
-              <p className="text-xs text-slate-400">Total Filled Songs:</p>
-              <p className="text-sm font-bold text-emerald-400 flex items-center gap-1">
-                <Music className="w-4 h-4" /> {totalValidSongs} Tracks
-              </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-xs font-bold text-[#E2E8F0] mb-2">
+                  {t.clientNameLabel}
+                </label>
+                <input
+                  type="text"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  placeholder={t.clientNamePlaceholder}
+                  className="w-full bg-[#1E212D] border border-[#333748] focus:border-[#F472B6] text-white text-sm px-4 py-3 rounded-xl outline-none transition-all duration-200 placeholder:text-[#94A3B8] min-h-[44px]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#E2E8F0] mb-2">
+                  {t.eventDateLabel}
+                </label>
+                <input
+                  type="date"
+                  value={eventDate}
+                  onChange={(e) => setEventDate(e.target.value)}
+                  className="w-full bg-[#1E212D] border border-[#333748] focus:border-[#F472B6] text-white text-sm px-4 py-3 rounded-xl outline-none transition-all duration-200 min-h-[44px]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#E2E8F0] mb-2">
+                  {t.phoneLabel}
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder={t.phonePlaceholder}
+                  className="w-full bg-[#1E212D] border border-[#333748] focus:border-[#F472B6] text-white text-sm px-4 py-3 rounded-xl outline-none transition-all duration-200 placeholder:text-[#94A3B8] min-h-[44px]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#E2E8F0] mb-2">
+                  {t.generalNotesLabel}
+                </label>
+                <input
+                  type="text"
+                  value={generalNotes}
+                  onChange={(e) => setGeneralNotes(e.target.value)}
+                  placeholder={t.generalNotesPlaceholder}
+                  className="w-full bg-[#1E212D] border border-[#333748] focus:border-[#F472B6] text-[#E2E8F0] text-sm px-4 py-3 rounded-xl outline-none transition-all duration-200 placeholder:text-[#94A3B8] min-h-[44px]"
+                />
+              </div>
+            </div>
+          </section>
+
+          {/* SECTION 2: 3-PHASE RITUAL SOUNDTRACK SELECTION */}
+          <section className="space-y-6">
+            <div className="bg-[#161820] border border-[#F472B6]/20 rounded-2xl p-6 shadow-xl">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-[#F472B6]" />
+                {t.ritualSectionTitle}
+              </h2>
+              <p className="text-xs text-[#E2E8F0] mt-1">{t.ritualSectionSubtitle}</p>
             </div>
 
+            {/* PHASE 1 ACCORDION */}
+            <div className="bg-[#161820] border border-[#F472B6]/20 rounded-2xl overflow-hidden shadow-xl">
+              <div
+                onClick={() => togglePhaseCollapse('phase1')}
+                className="p-5 bg-gradient-to-r from-[#161820] to-[#1E212D] flex items-center justify-between cursor-pointer hover:bg-[#1E212D] transition-colors border-b border-[#2A2D3A]"
+              >
+                <div className="flex items-center gap-3">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    {t.phase1Title}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="bg-[#F472B6]/15 text-[#F472B6] border border-[#F472B6]/30 text-xs font-bold px-3 py-1 rounded-full">
+                    🎵 {getPhaseSongCount(phase1Rituals)} Songs Added
+                  </span>
+                  {phaseCollapsed.phase1 ? (
+                    <ChevronDown className="w-5 h-5 text-[#94A3B8]" />
+                  ) : (
+                    <ChevronUp className="w-5 h-5 text-[#F472B6]" />
+                  )}
+                </div>
+              </div>
+
+              {!phaseCollapsed.phase1 && (
+                <div className="p-5 grid grid-cols-1 gap-4">
+                  {phase1Rituals.map(renderRitualCard)}
+                </div>
+              )}
+            </div>
+
+            {/* PHASE 2 ACCORDION */}
+            <div className="bg-[#161820] border border-[#F472B6]/20 rounded-2xl overflow-hidden shadow-xl">
+              <div
+                onClick={() => togglePhaseCollapse('phase2')}
+                className="p-5 bg-gradient-to-r from-[#161820] to-[#1E212D] flex items-center justify-between cursor-pointer hover:bg-[#1E212D] transition-colors border-b border-[#2A2D3A]"
+              >
+                <div className="flex items-center gap-3">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    {t.phase2Title}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="bg-[#F472B6]/15 text-[#F472B6] border border-[#F472B6]/30 text-xs font-bold px-3 py-1 rounded-full">
+                    🎵 {getPhaseSongCount(phase2Rituals)} Songs Added
+                  </span>
+                  {phaseCollapsed.phase2 ? (
+                    <ChevronDown className="w-5 h-5 text-[#94A3B8]" />
+                  ) : (
+                    <ChevronUp className="w-5 h-5 text-[#F472B6]" />
+                  )}
+                </div>
+              </div>
+
+              {!phaseCollapsed.phase2 && (
+                <div className="p-5 grid grid-cols-1 gap-4">
+                  {phase2Rituals.map(renderRitualCard)}
+                </div>
+              )}
+            </div>
+
+            {/* PHASE 3 ACCORDION */}
+            <div className="bg-[#161820] border border-[#F472B6]/20 rounded-2xl overflow-hidden shadow-xl">
+              <div
+                onClick={() => togglePhaseCollapse('phase3')}
+                className="p-5 bg-gradient-to-r from-[#161820] to-[#1E212D] flex items-center justify-between cursor-pointer hover:bg-[#1E212D] transition-colors border-b border-[#2A2D3A]"
+              >
+                <div className="flex items-center gap-3">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    {t.phase3Title}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="bg-[#F472B6]/15 text-[#F472B6] border border-[#F472B6]/30 text-xs font-bold px-3 py-1 rounded-full">
+                    🎵 {getPhaseSongCount(phase3Rituals)} Songs Added
+                  </span>
+                  {phaseCollapsed.phase3 ? (
+                    <ChevronDown className="w-5 h-5 text-[#94A3B8]" />
+                  ) : (
+                    <ChevronUp className="w-5 h-5 text-[#F472B6]" />
+                  )}
+                </div>
+              </div>
+
+              {!phaseCollapsed.phase3 && (
+                <div className="p-5 grid grid-cols-1 gap-4">
+                  {phase3Rituals.map(renderRitualCard)}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* STICKY FLOATING SUBMIT BUTTON BAR */}
+          <div className="sticky bottom-4 z-40">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-8 py-3.5 rounded-xl font-bold bg-gradient-to-r from-amber-500 via-rose-500 to-amber-500 hover:from-amber-400 hover:via-rose-400 hover:to-amber-400 text-slate-950 shadow-xl shadow-amber-500/20 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center gap-2 text-sm sm:text-base"
+              className="w-full min-h-[52px] py-4 px-8 rounded-2xl bg-gradient-to-r from-[#F472B6] via-[#FB7185] to-[#E11D48] hover:from-[#FB7185] hover:to-[#F472B6] text-white font-black text-base tracking-wide transition-all duration-200 shadow-2xl shadow-[#F472B6]/30 flex items-center justify-center gap-3 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
-                  <Clock className="w-5 h-5 animate-spin" />
-                  <span>{t.submittingBtn}</span>
+                  <Sparkles className="w-5 h-5 animate-spin" />
+                  {t.submittingBtn}
                 </>
               ) : (
                 <>
                   <Send className="w-5 h-5" />
-                  <span>{t.submitBtn}</span>
+                  {t.submitBtn}
                 </>
               )}
             </button>
           </div>
-        </div>
-      </form>
-
-      {/* Add Custom Ritual Modal */}
-      {showAddRitualModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="glass-card p-6 rounded-2xl max-w-sm w-full space-y-4 border-amber-500/40 shadow-2xl">
-            <h3 className="font-serif text-lg font-bold text-amber-300">
-              {t.customRitualModalTitle}
-            </h3>
-            <input
-              type="text"
-              placeholder={t.customRitualNamePlaceholder}
-              value={customRitualName}
-              onChange={(e) => setCustomRitualName(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl glass-input text-sm placeholder:text-slate-500"
-            />
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowAddRitualModal(false)}
-                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-medium transition-all"
-              >
-                {t.cancelBtn}
-              </button>
-              <button
-                type="button"
-                onClick={handleAddCustomRitual}
-                className="px-4 py-2 rounded-xl bg-amber-500 text-slate-950 text-xs font-bold transition-all hover:bg-amber-400"
-              >
-                {t.confirmAddBtn}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        </form>
+      </div>
     </div>
   );
 }

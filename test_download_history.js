@@ -37,9 +37,11 @@ async function testDownloadHistory() {
         return node;
       },
       getElementById: (id) => {
-        if (id === "contentArea") {
+        if (id === "contentArea" || id === "downloadsArea") {
           return {
+            id: id,
             innerHTML: "",
+            children: renderedNodes,
             appendChild: function(child) { renderedNodes.push(child); }
           };
         }

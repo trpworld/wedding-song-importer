@@ -47,27 +47,6 @@
     </div>
   </div>
 
-  <!-- Collapsible Studio Template Builder Section -->
-  <div id="templateBuilderSection" class="template-builder-section" style="display: none;">
-    <div class="template-header">
-      <span>📋 Studio Ritual Template Manager</span>
-      <button id="btnCloseTemplate" class="btn btn-xs">❌ Close</button>
-    </div>
-
-    <div class="template-add-bar">
-      <input type="text" id="tplRitualName" class="input-xs" placeholder="Ritual Name (e.g. 💍 Varmala)">
-      <input type="text" id="tplEnglishTag" class="input-xs" placeholder="Tag (e.g. Varmala)">
-      <button id="btnAddTplRitual" class="btn btn-xs btn-primary">➕ Add</button>
-    </div>
-
-    <div id="tplRitualList" class="template-ritual-list">
-      <!-- Ritual items rendered here dynamically -->
-    </div>
-
-    <div class="template-footer">
-      <button id="btnResetTemplate" class="btn btn-xs">🔄 Reset Default</button>
-      <button id="btnSaveTemplate" class="btn btn-xs btn-primary">💾 Save Template</button>
-    </div>
   <!-- Base Web URL Config Bar -->
   <div class="url-config-bar">
     <div class="config-info">
@@ -95,28 +74,72 @@
     </div>
   </div>
 
-  <!-- Controls / Search Bar -->
-  <div class="controls-bar">
-    <input type="text" id="searchInput" class="input-search" placeholder="Search Client / Couple or Ritual...">
+  <!-- Sleek Segmented 3-Tab Bar -->
+  <div class="tab-bar">
+    <button id="navTabSubmissions" class="tab-btn active">📥 Submissions</button>
+    <button id="navTabDownloads" class="tab-btn">⬇️ Downloads & History</button>
+    <button id="navTabTemplate" class="tab-btn">⚙️ Template</button>
   </div>
 
-  <!-- Target Output Directory Bar -->
-  <div class="folder-bar">
-    <div class="folder-info">
-      <span class="folder-icon">📁</span>
-      <span id="folderPathText" class="folder-path-text" title="Target Download Location">Detecting project folder...</span>
+  <!-- TAB 1: SUBMISSIONS FEED PANEL -->
+  <div id="tabSubmissions" class="tab-panel active">
+    <!-- Controls / Search Bar -->
+    <div class="controls-bar">
+      <input type="text" id="searchInput" class="input-search" placeholder="Search Client / Couple or Ritual...">
     </div>
-    <button id="btnSelectFolder" class="btn btn-xs" title="Change download destination folder">
-      ⚙️ Change
-    </button>
+
+    <!-- Target Output Directory Bar -->
+    <div class="folder-bar">
+      <div class="folder-info">
+        <span class="folder-icon">📁</span>
+        <span id="folderPathText" class="folder-path-text" title="Target Download Location">Detecting project folder...</span>
+      </div>
+      <button id="btnSelectFolder" class="btn btn-xs" title="Change download destination folder">
+        ⚙️ Change
+      </button>
+    </div>
+
+    <!-- Main Scrollable Content Area for Active Submissions -->
+    <main id="contentArea" class="content-area">
+      <div class="card text-center" style="text-align: center; padding: 20px;">
+        <p style="color: #888;">Loading wedding soundtrack submissions...</p>
+      </div>
+    </main>
   </div>
 
-  <!-- Main Scrollable Content Area -->
-  <main id="contentArea" class="content-area">
-    <div class="card text-center" style="text-align: center; padding: 20px;">
-      <p style="color: #888;">Loading wedding soundtrack submissions...</p>
+  <!-- TAB 2: DOWNLOADS & HISTORY PANEL -->
+  <div id="tabDownloads" class="tab-panel" style="display: none;">
+    <main id="downloadsArea" class="content-area">
+      <div class="card text-center" style="text-align: center; padding: 20px;">
+        <p style="color: #888;">No download history yet.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- TAB 3: STUDIO RITUAL TEMPLATE MANAGER PANEL -->
+  <div id="tabTemplate" class="tab-panel" style="display: none;">
+    <div id="templateBuilderSection" class="template-builder-section">
+      <div class="template-header">
+        <span>📋 Studio Ritual Template Manager</span>
+        <button id="btnCloseTemplate" class="btn btn-xs">❌ Close</button>
+      </div>
+
+      <div class="template-add-bar">
+        <input type="text" id="tplRitualName" class="input-xs" placeholder="Ritual Name (e.g. 💍 Varmala)">
+        <input type="text" id="tplEnglishTag" class="input-xs" placeholder="Tag (e.g. Varmala)">
+        <button id="btnAddTplRitual" class="btn btn-xs btn-primary">➕ Add</button>
+      </div>
+
+      <div id="tplRitualList" class="template-ritual-list">
+        <!-- Ritual items rendered here dynamically -->
+      </div>
+
+      <div class="template-footer">
+        <button id="btnResetTemplate" class="btn btn-xs">🔄 Reset Default</button>
+        <button id="btnSaveTemplate" class="btn btn-xs btn-primary">💾 Save Template</button>
+      </div>
     </div>
-  </main>
+  </div>
 
   <!-- Log Console Footer -->
   <footer class="log-console" id="logConsole">

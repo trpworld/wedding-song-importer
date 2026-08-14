@@ -270,6 +270,55 @@ body {
   border-color: #15803d;
 }
 
+/* Segmented 3-Tab Bar */
+.tab-bar {
+  display: flex;
+  background: #18181b;
+  border-bottom: 1px solid #27272a;
+  padding: 4px 6px;
+  gap: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #a1a1aa;
+  padding: 6px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.tab-btn:hover {
+  color: #f4f4f5;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+  color: #f59e0b;
+  background: #27272a;
+  border-color: #3f3f46;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* Tab Panels */
+.tab-panel {
+  display: none;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tab-panel.active {
+  display: flex;
+  flex-direction: column;
+}
+
 /* Collapsible Template Builder Section */
 .template-builder-section {
   background: #181819;

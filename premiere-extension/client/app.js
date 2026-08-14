@@ -289,8 +289,44 @@ function resetStudioTemplate() {
     }
 }
 
+function switchTab(targetTabId) {
+    var tabs = ["tabSubmissions", "tabDownloads", "tabTemplate"];
+    var navIds = {
+        "tabSubmissions": "navTabSubmissions",
+        "tabDownloads": "navTabDownloads",
+        "tabTemplate": "navTabTemplate"
+    };
+
+    tabs.forEach(function(tabId) {
+        var panel = document.getElementById(tabId);
+        var navBtn = document.getElementById(navIds[tabId]);
+
+        if (tabId === targetTabId) {
+            if (panel) panel.style.display = "block";
+            if (navBtn) navBtn.className = "tab-btn active";
+        } else {
+            if (panel) panel.style.display = "none";
+            if (navBtn) navBtn.className = "tab-btn";
+        }
+    });
+
+    if (targetTabId === "tabTemplate") {
+        fetchStudioTemplate();
+    }
+
+    logMessage("Switched to tab: " + targetTabId);
+}
+
 function initApp() {
     logMessage("Initializing Wedding Song Importer Extension...");
+
+    var btnTabSub = document.getElementById("navTabSubmissions");
+    var btnTabDown = document.getElementById("navTabDownloads");
+    var btnTabTpl = document.getElementById("navTabTemplate");
+
+    if (btnTabSub) btnTabSub.addEventListener("click", function() { switchTab("tabSubmissions"); });
+    if (btnTabDown) btnTabDown.addEventListener("click", function() { switchTab("tabDownloads"); });
+    if (btnTabTpl) btnTabTpl.addEventListener("click", function() { switchTab("tabTemplate"); });
 
     var studioInput = document.getElementById("studioIdInput");
     if (studioInput) {
@@ -332,21 +368,16 @@ function initApp() {
 
     var btnToggleTpl = document.getElementById("btnToggleTemplate");
     var btnCloseTpl = document.getElementById("btnCloseTemplate");
-    var tplSection = document.getElementById("templateBuilderSection");
 
-    if (btnToggleTpl && tplSection) {
+    if (btnToggleTpl) {
         btnToggleTpl.addEventListener("click", function() {
-            var isHidden = tplSection.style.display === "none";
-            tplSection.style.display = isHidden ? "flex" : "none";
-            if (isHidden) {
-                fetchStudioTemplate();
-            }
+            switchTab("tabTemplate");
         });
     }
 
-    if (btnCloseTpl && tplSection) {
+    if (btnCloseTpl) {
         btnCloseTpl.addEventListener("click", function() {
-            tplSection.style.display = "none";
+            switchTab("tabSubmissions");
         });
     }
 
@@ -642,7 +673,10 @@ function isSubmissionDownloaded(sub) {
 
 function renderSubmissions(query) {
     var container = document.getElementById("contentArea");
-    container.innerHTML = "";
+    var downloadsContainer = document.getElementById("downloadsArea");
+
+    if (container) container.innerHTML = "";
+    if (downloadsContainer) downloadsContainer.innerHTML = "";
 
     var searchQuery = (query || "").toLowerCase();
 
@@ -655,7 +689,8 @@ function renderSubmissions(query) {
     });
 
     if (filtered.length === 0) {
-        container.innerHTML = '<div class="card text-center"><p style="color:#888;">No submissions found.</p></div>';
+        if (container) container.innerHTML = '<div class="card text-center"><p style="color:#888;">No submissions found.</p></div>';
+        if (downloadsContainer) downloadsContainer.innerHTML = '<div class="card text-center"><p style="color:#888;">No download history found.</p></div>';
         return;
     }
 
@@ -736,8 +771,19 @@ function renderSubmissions(query) {
         card.appendChild(progBox);
         card.appendChild(btnImport);
 
-        container.appendChild(card);
+        if (isDownloaded) {
+            if (downloadsContainer) downloadsContainer.appendChild(card);
+        } else {
+            if (container) container.appendChild(card);
+        }
     });
+
+    if (container && container.children && container.children.length === 0) {
+        container.innerHTML = '<div class="card text-center"><p style="color:#888;">No active pending submissions.</p></div>';
+    }
+    if (downloadsContainer && downloadsContainer.children && downloadsContainer.children.length === 0) {
+        downloadsContainer.innerHTML = '<div class="card text-center"><p style="color:#888;">No download history yet.</p></div>';
+    }
 }
 
 function handleDownloadAndImport(sub, btnElement, subCleanId) {

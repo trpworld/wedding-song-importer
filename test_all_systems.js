@@ -10,6 +10,8 @@ function runMasterSmokeTest() {
     { name: "Step 2: Client Route Handling & CORS Preflight", file: "test_api_cors_routes.js" },
     { name: "Step 3: Local Agent Port & Download Engine Stability", file: "test_agent_robustness.js" },
     { name: "Step 4: CEP Extension ES3 & Path Integration", file: "test_jsx_es3_paths.js" },
+    { name: "3-Tab UI Architecture: DOM & Preserved Elements", file: "test_tab_dom.js" },
+    { name: "3-Tab Navigation: Switcher & State Management", file: "test_tab_switcher.js" },
     { name: "High-Speed Engine: Multi-Threaded Download & Progress API", file: "test_download_engine.js" },
     { name: "Real-Time UI: Dynamic Progress Bar & Polling", file: "test_ui_progress.js" },
     { name: "Feature: Persistent Download History & Re-download Button", file: "test_download_history.js" },

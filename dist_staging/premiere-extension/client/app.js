@@ -613,6 +613,33 @@ function startProgressPolling(jobId, subId) {
     return intervalId;
 }
 
+function getDownloadedHistory() {
+    try {
+        var raw = localStorage.getItem("wedding_downloaded_history");
+        return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function markSubmissionDownloaded(subId) {
+    if (!subId) return;
+    try {
+        var history = getDownloadedHistory();
+        if (history.indexOf(subId) === -1) {
+            history.push(subId);
+            localStorage.setItem("wedding_downloaded_history", JSON.stringify(history));
+        }
+    } catch (e) {}
+}
+
+function isSubmissionDownloaded(sub) {
+    if (!sub) return false;
+    if (sub.status === "Completed" || sub.is_downloaded) return true;
+    var history = getDownloadedHistory();
+    return history.indexOf(sub.id) !== -1;
+}
+
 function renderSubmissions(query) {
     var container = document.getElementById("contentArea");
     container.innerHTML = "";
@@ -634,6 +661,7 @@ function renderSubmissions(query) {
 
     filtered.forEach(function(sub) {
         var subCleanId = (sub.id || "sub-" + Math.random()).replace(/[^a-zA-Z0-9_-]/g, "");
+        var isDownloaded = isSubmissionDownloaded(sub);
 
         var card = document.createElement("div");
         card.className = "card";
@@ -654,8 +682,12 @@ function renderSubmissions(query) {
 
         var infoEl = document.createElement("div");
         infoEl.className = "card-info";
-        infoEl.innerHTML = '<span class="info-tag">🎵 ' + (sub.songs ? sub.songs.length : 0) + ' Tracks</span>' +
-                           '<span class="info-tag">📌 Status: ' + sub.status + '</span>';
+
+        var statusTag = isDownloaded
+            ? '<span class="info-tag downloaded-badge">✅ Downloaded</span>'
+            : '<span class="info-tag">📌 Status: ' + sub.status + '</span>';
+
+        infoEl.innerHTML = '<span class="info-tag">🎵 ' + (sub.songs ? sub.songs.length : 0) + ' Tracks</span>' + statusTag;
 
         // Ritual track list
         var listEl = document.createElement("div");
@@ -685,11 +717,11 @@ function renderSubmissions(query) {
 
         // Action Button
         var btnImport = document.createElement("button");
-        btnImport.className = "btn btn-primary";
+        btnImport.className = isDownloaded ? "btn btn-secondary btn-redownload" : "btn btn-primary";
         btnImport.style.width = "100%";
 
-        if (sub.status === "Completed" || sub.is_downloaded) {
-            btnImport.innerHTML = "✅ Imported (Click to Re-Import)";
+        if (isDownloaded) {
+            btnImport.innerHTML = "🔄 Re-download & Import";
         } else {
             btnImport.innerHTML = "📥 Download & Import to Premiere Pro";
         }
@@ -755,7 +787,8 @@ function handleDownloadAndImport(sub, btnElement, subCleanId) {
                             logMessage("🎉 SUCCESS: " + resObj.message + " (" + resObj.importedCount + " files)");
                             btnElement.textContent = "✅ Imported to " + resObj.parentBinName;
 
-                            // Mark submission completed in cloud queue
+                            markSubmissionDownloaded(sub.id);
+
                             fetch(LOCAL_AGENT_URL + "/status", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },

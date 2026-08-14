@@ -175,6 +175,65 @@ body {
   border-color: #1473e6;
 }
 
+/* Client Form Link & Quick Share Bar */
+.share-bar {
+  padding: 6px 12px;
+  background: #1e1e1f;
+  border-bottom: 1px solid #2a2a2b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.share-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.share-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #38bdf8;
+  white-space: nowrap;
+}
+
+.input-url {
+  flex: 1;
+  background: #141414;
+  border: 1px solid #333333;
+  color: #a3e635;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: text;
+}
+
+.share-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.btn-whatsapp {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.btn-whatsapp:hover {
+  background: #15803d;
+  border-color: #15803d;
+}
+
 /* Controls / Search Bar */
 .controls-bar {
   padding: 8px 12px;

@@ -81,13 +81,72 @@ function getSavedStudioId() {
     return localStorage.getItem("wedding_studio_id") || "trpworld";
 }
 
+function getClientFormUrl() {
+    var studioId = getSavedStudioId();
+    return "https://wedding-song-importer.vercel.app/" + encodeURIComponent(studioId);
+}
+
+function updateClientUrlDisplay() {
+    var urlInput = document.getElementById("clientUrlDisplay");
+    if (urlInput) {
+        var url = getClientFormUrl();
+        urlInput.value = url;
+        urlInput.title = url;
+    }
+}
+
+function handleCopyLink() {
+    var url = getClientFormUrl();
+    var btn = document.getElementById("btnCopyLink");
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url);
+    } else {
+        var urlInput = document.getElementById("clientUrlDisplay");
+        if (urlInput) {
+            urlInput.select();
+            document.execCommand("copy");
+        }
+    }
+
+    if (btn) {
+        btn.textContent = "✅ Copied!";
+        setTimeout(function() {
+            btn.textContent = "📋 Copy";
+        }, 2000);
+    }
+
+    logMessage("Copied client link: " + url);
+}
+
+function handleShareWhatsApp() {
+    var url = getClientFormUrl();
+    var shareMsg = "Please select your wedding songs here: " + url;
+    var waUrl = "https://api.whatsapp.com/send?text=" + encodeURIComponent(shareMsg);
+
+    if (csInterface && csInterface.openURLInDefaultBrowser) {
+        csInterface.openURLInDefaultBrowser(waUrl);
+    } else {
+        window.open(waUrl, "_blank");
+    }
+
+    logMessage("Opened WhatsApp share link.");
+}
+
 function initApp() {
     logMessage("Initializing Wedding Song Importer Extension...");
 
     var studioInput = document.getElementById("studioIdInput");
     if (studioInput) {
         studioInput.value = getSavedStudioId();
+        studioInput.addEventListener("input", function() {
+            var val = studioInput.value.trim() || "trpworld";
+            localStorage.setItem("wedding_studio_id", val);
+            updateClientUrlDisplay();
+        });
     }
+
+    updateClientUrlDisplay();
 
     var btnStudio = document.getElementById("btnSaveStudio");
     if (btnStudio) {
@@ -95,8 +154,23 @@ function initApp() {
             var val = studioInput ? studioInput.value.trim() : "trpworld";
             if (!val) val = "trpworld";
             localStorage.setItem("wedding_studio_id", val);
+            updateClientUrlDisplay();
             logMessage("Saved Studio ID: " + val + ". Syncing queue...");
             fetchSubmissionsData();
+        });
+    }
+
+    var btnCopy = document.getElementById("btnCopyLink");
+    if (btnCopy) {
+        btnCopy.addEventListener("click", function() {
+            handleCopyLink();
+        });
+    }
+
+    var btnWA = document.getElementById("btnShareWhatsApp");
+    if (btnWA) {
+        btnWA.addEventListener("click", function() {
+            handleShareWhatsApp();
         });
     }
 

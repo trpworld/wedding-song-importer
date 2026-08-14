@@ -133,3 +133,68 @@ export async function updateSubmissionStatus(
   }
   return false;
 }
+
+import { CustomRitual, BENGALI_RITUAL_GROUPS } from './types';
+
+const defaultFallbackRituals: CustomRitual[] = BENGALI_RITUAL_GROUPS.flatMap((group) =>
+  group.rituals.map((r) => ({
+    id: r.id,
+    name: r.name,
+    englishTag: r.englishTag,
+    category: r.category,
+  }))
+);
+
+const fallbackTemplates = new Map<string, CustomRitual[]>();
+
+export async function getStudioTemplate(studioId: string = 'trpworld'): Promise<CustomRitual[]> {
+  const cleanStudioId = studioId.trim().toLowerCase() || 'default';
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('studio_templates')
+        .select('*')
+        .eq('studio_id', cleanStudioId)
+        .single();
+
+      if (!error && data && Array.isArray(data.rituals)) {
+        return data.rituals as CustomRitual[];
+      }
+    } catch (err) {
+      console.error('Error fetching studio template:', err);
+    }
+  }
+
+  if (fallbackTemplates.has(cleanStudioId)) {
+    return fallbackTemplates.get(cleanStudioId)!;
+  }
+
+  return defaultFallbackRituals;
+}
+
+export async function saveStudioTemplate(
+  studioId: string,
+  rituals: CustomRitual[]
+): Promise<CustomRitual[]> {
+  const cleanStudioId = studioId.trim().toLowerCase() || 'default';
+
+  if (isSupabaseConfigured && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('studio_templates')
+        .upsert({ studio_id: cleanStudioId, rituals, updated_at: new Date().toISOString() })
+        .select()
+        .single();
+
+      if (!error && data && Array.isArray(data.rituals)) {
+        return data.rituals as CustomRitual[];
+      }
+    } catch (err) {
+      console.error('Error saving studio template to Supabase:', err);
+    }
+  }
+
+  fallbackTemplates.set(cleanStudioId, rituals);
+  return rituals;
+}

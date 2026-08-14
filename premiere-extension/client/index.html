@@ -37,10 +37,40 @@
       <span class="studio-label">🆔 Studio:</span>
       <input type="text" id="studioIdInput" class="input-studio" placeholder="Studio ID (e.g. trpworld)" value="trpworld">
     </div>
-    <button id="btnSaveStudio" class="btn btn-xs btn-primary" title="Save Studio ID & Sync Queue">
-      💾 Sync
-    </button>
+    <div class="studio-actions" style="display: flex; gap: 4px;">
+      <button id="btnSaveStudio" class="btn btn-xs btn-primary" title="Save Studio ID & Sync Queue">
+        💾 Sync
+      </button>
+      <button id="btnToggleTemplate" class="btn btn-xs" title="Manage Studio Ritual Template">
+        ⚙️ Template
+      </button>
+    </div>
   </div>
+
+  <!-- Collapsible Studio Template Builder Section -->
+  <div id="templateBuilderSection" class="template-builder-section" style="display: none;">
+    <div class="template-header">
+      <span>📋 Studio Ritual Template Manager</span>
+      <button id="btnCloseTemplate" class="btn btn-xs">❌ Close</button>
+    </div>
+
+    <div class="template-add-bar">
+      <input type="text" id="tplRitualName" class="input-xs" placeholder="Ritual Name (e.g. 💍 Varmala)">
+      <input type="text" id="tplEnglishTag" class="input-xs" placeholder="Tag (e.g. Varmala)">
+      <button id="btnAddTplRitual" class="btn btn-xs btn-primary">➕ Add</button>
+    </div>
+
+    <div id="tplRitualList" class="template-ritual-list">
+      <!-- Ritual items rendered here dynamically -->
+    </div>
+
+    <div class="template-footer">
+      <button id="btnResetTemplate" class="btn btn-xs">🔄 Reset Default</button>
+      <button id="btnSaveTemplate" class="btn btn-xs btn-primary">💾 Save Template</button>
+    </div>
+  </div>
+
+  <!-- Client Form Link & Quick Share Bar -->
 
   <!-- Client Form Link & Quick Share Bar -->
   <div class="share-bar">

@@ -133,6 +133,138 @@ function handleShareWhatsApp() {
     logMessage("Opened WhatsApp share link.");
 }
 
+var currentStudioTemplate = [];
+
+function fetchStudioTemplate() {
+    var studioId = getSavedStudioId();
+    logMessage("Fetching ritual template for Studio ID [" + studioId + "]...");
+
+    var url = "https://wedding-song-importer.vercel.app/api/templates?studioId=" + encodeURIComponent(studioId);
+
+    fetch(url)
+        .then(function(res) { return res.json(); })
+        .then(function(json) {
+            if (json.success && Array.isArray(json.data)) {
+                currentStudioTemplate = json.data;
+                renderTemplateEditor();
+                logMessage("Loaded " + currentStudioTemplate.length + " ritual(s) in template.");
+            }
+        })
+        .catch(function(err) {
+            logMessage("Failed to load studio template: " + err.message, true);
+        });
+}
+
+function renderTemplateEditor() {
+    var listEl = document.getElementById("tplRitualList");
+    if (!listEl) return;
+    listEl.innerHTML = "";
+
+    if (currentStudioTemplate.length === 0) {
+        listEl.innerHTML = '<div style="color:#888; font-size:10px; padding:4px;">No custom rituals. Default template will be used.</div>';
+        return;
+    }
+
+    currentStudioTemplate.forEach(function(item, idx) {
+        var row = document.createElement("div");
+        row.className = "template-item";
+
+        var nameSpan = document.createElement("span");
+        nameSpan.className = "template-item-name";
+        nameSpan.textContent = item.name;
+
+        var tagSpan = document.createElement("span");
+        tagSpan.className = "template-item-tag";
+        tagSpan.textContent = item.englishTag ? " (" + item.englishTag + ")" : "";
+        nameSpan.appendChild(tagSpan);
+
+        var delBtn = document.createElement("button");
+        delBtn.className = "btn btn-xs";
+        delBtn.textContent = "🗑️";
+        delBtn.style.padding = "1px 4px";
+        delBtn.addEventListener("click", function() {
+            deleteRitualFromTemplate(idx);
+        });
+
+        row.appendChild(nameSpan);
+        row.appendChild(delBtn);
+        listEl.appendChild(row);
+    });
+}
+
+function addRitualToTemplate() {
+    var nameInput = document.getElementById("tplRitualName");
+    var tagInput = document.getElementById("tplEnglishTag");
+
+    var name = nameInput ? nameInput.value.trim() : "";
+    var tag = tagInput ? tagInput.value.trim() : "";
+
+    if (!name) {
+        alert("Please enter a ritual name.");
+        return;
+    }
+
+    currentStudioTemplate.push({
+        id: "ritual-" + Date.now(),
+        name: name,
+        englishTag: tag || name
+    });
+
+    if (nameInput) nameInput.value = "";
+    if (tagInput) tagInput.value = "";
+
+    renderTemplateEditor();
+}
+
+function deleteRitualFromTemplate(idx) {
+    if (idx >= 0 && idx < currentStudioTemplate.length) {
+        currentStudioTemplate.splice(idx, 1);
+        renderTemplateEditor();
+    }
+}
+
+function saveStudioTemplate() {
+    var studioId = getSavedStudioId();
+    var btn = document.getElementById("btnSaveTemplate");
+
+    if (btn) btn.disabled = true;
+    logMessage("Saving ritual template for [" + studioId + "]...");
+
+    var url = "https://wedding-song-importer.vercel.app/api/templates";
+
+    fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            studio_id: studioId,
+            rituals: currentStudioTemplate
+        })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(json) {
+        if (btn) btn.disabled = false;
+        if (json.success) {
+            logMessage("🎉 Saved " + currentStudioTemplate.length + " ritual(s) to Studio ID [" + studioId + "]");
+            alert("Studio Template saved successfully!");
+        } else {
+            throw new Error(json.error || "Failed to save template");
+        }
+    })
+    .catch(function(err) {
+        if (btn) btn.disabled = false;
+        logMessage("Error saving template: " + err.message, true);
+        alert("Error saving template: " + err.message);
+    });
+}
+
+function resetStudioTemplate() {
+    if (confirm("Reset template to default 25 Bengali rituals?")) {
+        currentStudioTemplate = [];
+        saveStudioTemplate();
+        fetchStudioTemplate();
+    }
+}
+
 function initApp() {
     logMessage("Initializing Wedding Song Importer Extension...");
 
@@ -157,6 +289,47 @@ function initApp() {
             updateClientUrlDisplay();
             logMessage("Saved Studio ID: " + val + ". Syncing queue...");
             fetchSubmissionsData();
+        });
+    }
+
+    var btnToggleTpl = document.getElementById("btnToggleTemplate");
+    var btnCloseTpl = document.getElementById("btnCloseTemplate");
+    var tplSection = document.getElementById("templateBuilderSection");
+
+    if (btnToggleTpl && tplSection) {
+        btnToggleTpl.addEventListener("click", function() {
+            var isHidden = tplSection.style.display === "none";
+            tplSection.style.display = isHidden ? "flex" : "none";
+            if (isHidden) {
+                fetchStudioTemplate();
+            }
+        });
+    }
+
+    if (btnCloseTpl && tplSection) {
+        btnCloseTpl.addEventListener("click", function() {
+            tplSection.style.display = "none";
+        });
+    }
+
+    var btnAddTpl = document.getElementById("btnAddTplRitual");
+    if (btnAddTpl) {
+        btnAddTpl.addEventListener("click", function() {
+            addRitualToTemplate();
+        });
+    }
+
+    var btnSaveTpl = document.getElementById("btnSaveTemplate");
+    if (btnSaveTpl) {
+        btnSaveTpl.addEventListener("click", function() {
+            saveStudioTemplate();
+        });
+    }
+
+    var btnResetTpl = document.getElementById("btnResetTemplate");
+    if (btnResetTpl) {
+        btnResetTpl.addEventListener("click", function() {
+            resetStudioTemplate();
         });
     }
 

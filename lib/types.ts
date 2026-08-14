@@ -86,3 +86,16 @@ export const BENGALI_RITUAL_GROUPS: RitualCategoryGroup[] = [
 ];
 
 export const DEFAULT_RITUALS = BENGALI_RITUAL_GROUPS.flatMap(g => g.rituals.map(r => r.name));
+
+export interface CustomRitual {
+  id: string;
+  name: string;
+  englishTag: string;
+  category?: string;
+}
+
+export interface StudioTemplate {
+  studio_id: string;
+  rituals: CustomRitual[];
+  updated_at?: string;
+}

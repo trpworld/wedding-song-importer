@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BENGALI_RITUAL_GROUPS, BengaliRitual, SongItem } from '@/lib/types';
 import {
   CheckCircle2,
@@ -41,7 +41,7 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
   const [phone, setPhone] = useState('');
   const [generalNotes, setGeneralNotes] = useState('');
 
-  // Initialize form state with 25 Bengali rituals
+  // Initialize form state with default rituals
   const [rituals, setRituals] = useState<FormRitualCard[]>(() =>
     BENGALI_RITUAL_GROUPS.flatMap((group) =>
       group.rituals.map((r) => ({
@@ -54,6 +54,29 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
       }))
     )
   );
+
+  useEffect(() => {
+    async function loadStudioTemplate() {
+      try {
+        const res = await fetch(`/api/templates?studioId=${encodeURIComponent(studioId)}`);
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          const customCards: FormRitualCard[] = json.data.map((r: any, idx: number) => ({
+            id: `ritual-custom-${r.id || idx}`,
+            ritualName: r.name,
+            englishTag: r.englishTag || 'Custom',
+            category: r.category || 'wedding_ceremony',
+            songs: [{ id: `song-custom-${r.id || idx}-1`, url: '' }],
+            notes: '',
+          }));
+          setRituals(customCards);
+        }
+      } catch (e) {
+        console.error('Error fetching studio template:', e);
+      }
+    }
+    loadStudioTemplate();
+  }, [studioId]);
 
   const [customRitualName, setCustomRitualName] = useState('');
   const [showAddRitualModal, setShowAddRitualModal] = useState(false);

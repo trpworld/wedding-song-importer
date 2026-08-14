@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getSubmissions, createSubmission, updateSubmissionStatus } from '@/lib/storage';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const data = await getSubmissions();
+    const { searchParams } = new URL(req.url);
+    const studioId = searchParams.get('studioId') || searchParams.get('studio_id') || undefined;
+    const data = await getSubmissions(studioId);
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
     return NextResponse.json(
@@ -16,7 +18,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { client_name, event_date, phone, general_notes, songs } = body;
+    const { studio_id, studioId, client_name, event_date, phone, general_notes, songs } = body;
 
     if (!client_name || !event_date || !songs || !Array.isArray(songs)) {
       return NextResponse.json(
@@ -26,6 +28,7 @@ export async function POST(req: Request) {
     }
 
     const created = await createSubmission({
+      studio_id: studio_id || studioId || 'default',
       client_name,
       event_date,
       phone: phone || '',

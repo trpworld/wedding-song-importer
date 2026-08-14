@@ -77,8 +77,28 @@ function handleSelectFolder() {
     });
 }
 
+function getSavedStudioId() {
+    return localStorage.getItem("wedding_studio_id") || "trpworld";
+}
+
 function initApp() {
     logMessage("Initializing Wedding Song Importer Extension...");
+
+    var studioInput = document.getElementById("studioIdInput");
+    if (studioInput) {
+        studioInput.value = getSavedStudioId();
+    }
+
+    var btnStudio = document.getElementById("btnSaveStudio");
+    if (btnStudio) {
+        btnStudio.addEventListener("click", function() {
+            var val = studioInput ? studioInput.value.trim() : "trpworld";
+            if (!val) val = "trpworld";
+            localStorage.setItem("wedding_studio_id", val);
+            logMessage("Saved Studio ID: " + val + ". Syncing queue...");
+            fetchSubmissionsData();
+        });
+    }
 
     // Bind UI actions
     document.getElementById("btnRefresh").addEventListener("click", function() {
@@ -242,12 +262,15 @@ function checkAgentAndFetchData() {
 }
 
 function fetchSubmissionsData() {
-    logMessage("Fetching latest submissions from cloud queue...");
+    var studioId = getSavedStudioId();
+    logMessage("Fetching submissions for Studio ID [" + studioId + "]...");
+
+    var studioParam = "?studioId=" + encodeURIComponent(studioId);
 
     var cloudUrls = [
-        CLOUD_API_URL,
-        "http://localhost:3001/api/submissions",
-        "http://localhost:3000/api/submissions"
+        CLOUD_API_URL + studioParam,
+        "http://localhost:3000/api/submissions" + studioParam,
+        "http://localhost:3001/api/submissions" + studioParam
     ];
 
     function tryFetch(index) {

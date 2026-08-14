@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wedding Song Importer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Panel Header -->
+  <header class="panel-header">
+    <div class="header-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e5a93b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 18V5l12-2v13"></path>
+        <circle cx="6" cy="18" r="3"></circle>
+        <circle cx="18" cy="16" r="3"></circle>
+      </svg>
+      <h1>Wedding Song Importer</h1>
+      <span class="badge-version">v2.0</span>
+    </div>
+
+    <div class="header-actions">
+      <div id="statusPill" class="status-pill offline">
+        <span class="status-dot"></span>
+        <span id="statusText">Checking Agent...</span>
+      </div>
+      <button id="btnRefresh" class="btn btn-icon" title="Refresh submissions">
+        🔄
+      </button>
+    </div>
+  </header>
+
+  <!-- Studio ID Switcher Bar -->
+  <div class="studio-bar">
+    <div class="studio-info">
+      <span class="studio-label">🆔 Studio:</span>
+      <input type="text" id="studioIdInput" class="input-studio" placeholder="Studio ID (e.g. trpworld)" value="trpworld">
+    </div>
+    <button id="btnSaveStudio" class="btn btn-xs btn-primary" title="Save Studio ID & Sync Queue">
+      💾 Sync
+    </button>
+  </div>
+
+  <!-- Controls / Search Bar -->
+  <div class="controls-bar">
+    <input type="text" id="searchInput" class="input-search" placeholder="Search Client / Couple or Ritual...">
+  </div>
+
+  <!-- Target Output Directory Bar -->
+  <div class="folder-bar">
+    <div class="folder-info">
+      <span class="folder-icon">📁</span>
+      <span id="folderPathText" class="folder-path-text" title="Target Download Location">Detecting project folder...</span>
+    </div>
+    <button id="btnSelectFolder" class="btn btn-xs" title="Change download destination folder">
+      ⚙️ Change
+    </button>
+  </div>
+
+  <!-- Main Scrollable Content Area -->
+  <main id="contentArea" class="content-area">
+    <div class="card text-center" style="text-align: center; padding: 20px;">
+      <p style="color: #888;">Loading wedding soundtrack submissions...</p>
+    </div>
+  </main>
+
+  <!-- Log Console Footer -->
+  <footer class="log-console" id="logConsole">
+    <div class="log-entry">⚡ System Ready. Connect Local Agent on port 5050.</div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="CSInterface.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

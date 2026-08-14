@@ -35,7 +35,7 @@ interface FormRitualCard {
   notes: string;
 }
 
-export default function ClientSubmissionPage() {
+export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studioId?: string } = {}) {
   const [clientName, setClientName] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [phone, setPhone] = useState('');
@@ -215,6 +215,7 @@ export default function ClientSubmissionPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          studio_id: studioId,
           client_name: clientName.trim(),
           event_date: eventDate,
           phone: phone.trim(),

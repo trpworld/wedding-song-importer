@@ -5,6 +5,7 @@ import { Submission } from './types';
 let fallbackSubmissions: Submission[] = [
   {
     id: 'demo-1',
+    studio_id: 'default',
     client_name: 'Ananya & Rahul',
     event_date: '2026-11-25',
     status: 'pending',
@@ -30,31 +31,47 @@ let fallbackSubmissions: Submission[] = [
   },
 ];
 
-export async function getSubmissions(): Promise<Submission[]> {
+export async function getSubmissions(studioId?: string): Promise<Submission[]> {
   if (isSupabaseConfigured && supabase) {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('song_submissions')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*');
+
+      if (studioId && studioId.trim().length > 0) {
+        query = query.eq('studio_id', studioId.trim());
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
         console.error('Supabase fetch error:', error);
-        return fallbackSubmissions;
+        return filterFallbackByStudio(studioId);
       }
       return data as Submission[];
     } catch (err) {
       console.error('Error contacting Supabase:', err);
-      return fallbackSubmissions;
+      return filterFallbackByStudio(studioId);
     }
   }
-  return fallbackSubmissions;
+  return filterFallbackByStudio(studioId);
+}
+
+function filterFallbackByStudio(studioId?: string): Submission[] {
+  if (!studioId || studioId.trim().length === 0) {
+    return fallbackSubmissions;
+  }
+  const cleanId = studioId.trim();
+  return fallbackSubmissions.filter(
+    (s) => s.studio_id === cleanId || (!s.studio_id && cleanId === 'default')
+  );
 }
 
 export async function createSubmission(
   payload: Omit<Submission, 'id' | 'created_at' | 'status' | 'is_downloaded'>
 ): Promise<Submission> {
   const newSubmissionData = {
+    studio_id: payload.studio_id || 'default',
     client_name: payload.client_name,
     event_date: payload.event_date,
     phone: payload.phone || '',

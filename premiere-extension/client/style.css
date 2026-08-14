@@ -135,6 +135,46 @@ body {
   padding: 4px 6px;
 }
 
+/* Studio ID Switcher Bar */
+.studio-bar {
+  padding: 6px 12px;
+  background: #252526;
+  border-bottom: 1px solid #2d2d2d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.studio-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.studio-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #e5a93b;
+}
+
+.input-studio {
+  flex: 1;
+  background: #181818;
+  border: 1px solid #383838;
+  color: #ffffff;
+  padding: 3px 6px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.input-studio:focus {
+  outline: none;
+  border-color: #1473e6;
+}
+
 /* Controls / Search Bar */
 .controls-bar {
   padding: 8px 12px;

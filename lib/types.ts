@@ -6,6 +6,7 @@ export interface SongItem {
 
 export interface Submission {
   id: string;
+  studio_id?: string;
   client_name: string;
   event_date: string;
   phone?: string;

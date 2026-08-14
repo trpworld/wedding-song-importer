@@ -276,16 +276,26 @@ export default function ClientForm({ studioId = 'trpworld' }: ClientFormProps) {
     }, 0);
   };
 
+  const isValidAudioOrVideoUrl = (urlStr: string): boolean => {
+    if (!urlStr || typeof urlStr !== 'string') return false;
+    const trimmed = urlStr.trim();
+    if (trimmed.length < 5) return false;
+    const pattern = /^(https?:\/\/)?(www\.|m\.|music\.)?(youtube\.com|youtu\.be|vimeo\.com|soundcloud\.com|drive\.google\.com|dropbox\.com|\S+\.(mp3|wav|m4a|aac|ogg|flac))(\/.*)?$/i;
+    return pattern.test(trimmed) || trimmed.startsWith('http://') || trimmed.startsWith('https://');
+  };
+
   // Submission Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     setErrorMessage('');
 
     const formattedSongs: Array<{ ritualName: string; url: string; notes: string }> = [];
 
     Object.entries(ritualSongs).forEach(([rName, sList]) => {
       sList.forEach(s => {
-        if (s.url && s.url.trim().length > 0) {
+        if (s.url && isValidAudioOrVideoUrl(s.url)) {
           formattedSongs.push({
             ritualName: rName,
             url: s.url.trim(),

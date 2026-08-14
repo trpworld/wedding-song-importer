@@ -673,11 +673,15 @@ function startProgressPolling(jobId, subId) {
                 if (statusText) statusText.textContent = (data.status === "downloading" ? "⬇️ " : "⏳ ") + (data.current_song || "Downloading...");
                 if (metaText) metaText.textContent = Math.round(pct) + "% • " + (data.speed || "⚡ 0.0 MB/s") + " (ETA " + (data.eta || "0s") + ")";
 
-                if (data.status === "completed" || pct >= 100) {
+                if (data.status === "completed" || data.status === "error" || pct >= 100) {
                     clearInterval(intervalId);
-                    if (barFill) barFill.style.width = "100%";
-                    if (statusText) statusText.textContent = "✅ Download Complete! Importing...";
-                    if (metaText) metaText.textContent = "100% • Done";
+                    if (data.status === "error") {
+                        if (statusText) statusText.textContent = "❌ Error: " + (data.current_song || "Download failed");
+                    } else {
+                        if (barFill) barFill.style.width = "100%";
+                        if (statusText) statusText.textContent = "✅ Download Complete! Importing...";
+                        if (metaText) metaText.textContent = "100% • Done";
+                    }
                 }
             })
             .catch(function() {});
@@ -689,7 +693,8 @@ function startProgressPolling(jobId, subId) {
 function getDownloadedHistory() {
     try {
         var raw = localStorage.getItem("wedding_downloaded_history");
-        return raw ? JSON.parse(raw) : [];
+        var parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
     } catch (e) {
         return [];
     }

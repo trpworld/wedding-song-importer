@@ -114,7 +114,19 @@ def download_songs():
         return jsonify({"status": "error", "message": "No songs provided in payload"}), 400
 
     clean_client = sanitize_filename(client_name)
-    client_folder = os.path.join(DEFAULT_BASE_DIR, clean_client)
+    download_dir_override = data.get('downloadDir') or data.get('targetDir') or data.get('projectDir')
+
+    if download_dir_override and isinstance(download_dir_override, str) and len(download_dir_override.strip()) > 0:
+        target_base = download_dir_override.strip()
+        try:
+            os.makedirs(target_base, exist_ok=True)
+            base_dir = target_base
+        except Exception:
+            base_dir = DEFAULT_BASE_DIR
+    else:
+        base_dir = DEFAULT_BASE_DIR
+
+    client_folder = os.path.join(base_dir, clean_client)
     os.makedirs(client_folder, exist_ok=True)
 
     # 1. Generate Special_Notes.txt inside client folder

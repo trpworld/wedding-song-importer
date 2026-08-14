@@ -21,6 +21,45 @@ $.weddingImporter = {
     },
 
     /**
+     * Get directory containing current active Premiere Pro project (.prproj)
+     * Returns empty string if project is unsaved or closed
+     */
+    getProjectPath: function() {
+        try {
+            if (this.checkActiveProject() && app.project.path && app.project.path.length > 0) {
+                var pFile = new File(app.project.path);
+                if (pFile.parent) {
+                    return pFile.parent.fsName;
+                }
+            }
+        } catch (e) {
+            // Silently fallback if app.project.path is unavailable
+        }
+        return "";
+    },
+
+    /**
+     * Launch native OS folder picker dialog to select custom download destination
+     */
+    selectFolder: function() {
+        try {
+            var initialFolderStr = this.getProjectPath();
+            var targetFolder = null;
+            if (initialFolderStr && initialFolderStr.length > 0) {
+                targetFolder = new Folder(initialFolderStr).selectDialog("Select Download Location for Wedding Songs");
+            } else {
+                targetFolder = Folder.selectDialog("Select Download Location for Wedding Songs");
+            }
+            if (targetFolder) {
+                return targetFolder.fsName;
+            }
+        } catch (e) {
+            // Silently fallback if folder dialog fails
+        }
+        return "";
+    },
+
+    /**
      * Find existing Bin or create new Bin under parentBin
      */
     getOrCreateBin: function(parentBin, binName) {

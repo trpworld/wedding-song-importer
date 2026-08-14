@@ -10,6 +10,8 @@ var CLOUD_API_URL = "https://wedding-song-importer.vercel.app/api/submissions";
 var submissions = [];
 var isAgentConnected = false;
 var isSpawning = false;
+var activeProjectFolder = "";
+var customDownloadFolder = localStorage.getItem("wedding_download_folder") || "";
 
 document.addEventListener("DOMContentLoaded", function() {
     initApp();
@@ -26,6 +28,55 @@ function logMessage(msg, isError) {
     consoleEl.scrollTop = consoleEl.scrollHeight;
 }
 
+function updateFolderUI() {
+    var textEl = document.getElementById("folderPathText");
+    if (!textEl) return;
+
+    if (activeProjectFolder && activeProjectFolder.length > 0) {
+        textEl.textContent = "Project: " + activeProjectFolder;
+        textEl.title = "Active Premiere Pro project directory: " + activeProjectFolder;
+    } else if (customDownloadFolder && customDownloadFolder.length > 0) {
+        textEl.textContent = "Custom: " + customDownloadFolder;
+        textEl.title = "Selected download location: " + customDownloadFolder;
+    } else {
+        textEl.textContent = "Default: Wedding_Projects";
+        textEl.title = "Default base directory";
+    }
+}
+
+function refreshTargetDirectory(callback) {
+    csInterface.evalScript("$.weddingImporter.getProjectPath()", function(res) {
+        if (res && res !== "evalScript error." && res.length > 0) {
+            activeProjectFolder = res;
+        } else {
+            activeProjectFolder = "";
+        }
+        updateFolderUI();
+        if (callback) callback(getActiveDownloadDir());
+    });
+}
+
+function getActiveDownloadDir() {
+    if (activeProjectFolder && activeProjectFolder.length > 0) {
+        return activeProjectFolder;
+    }
+    if (customDownloadFolder && customDownloadFolder.length > 0) {
+        return customDownloadFolder;
+    }
+    return "";
+}
+
+function handleSelectFolder() {
+    csInterface.evalScript("$.weddingImporter.selectFolder()", function(res) {
+        if (res && res !== "evalScript error." && res.length > 0) {
+            customDownloadFolder = res;
+            localStorage.setItem("wedding_download_folder", res);
+            logMessage("Selected custom download folder: " + res);
+            updateFolderUI();
+        }
+    });
+}
+
 function initApp() {
     logMessage("Initializing Wedding Song Importer Extension...");
 
@@ -37,6 +88,15 @@ function initApp() {
     document.getElementById("searchInput").addEventListener("input", function(e) {
         renderSubmissions(e.target.value);
     });
+
+    var btnFolder = document.getElementById("btnSelectFolder");
+    if (btnFolder) {
+        btnFolder.addEventListener("click", function() {
+            handleSelectFolder();
+        });
+    }
+
+    refreshTargetDirectory();
 
     // Run auto-spawning supervisor
     ensureAgentRunning();
@@ -304,61 +364,64 @@ function handleDownloadAndImport(sub, btnElement) {
     btnElement.textContent = "⏳ Downloading Tracks & Notes...";
     logMessage("Triggering download for " + sub.client_name + " via Local Agent...");
 
-    fetch(LOCAL_AGENT_URL + "/download", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            id: sub.id,
-            clientName: sub.client_name,
-            eventDate: sub.event_date,
-            phone: sub.phone || "",
-            general_notes: sub.general_notes || "",
-            songs: sub.songs
+    refreshTargetDirectory(function(targetDir) {
+        fetch(LOCAL_AGENT_URL + "/download", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                id: sub.id,
+                clientName: sub.client_name,
+                eventDate: sub.event_date,
+                phone: sub.phone || "",
+                general_notes: sub.general_notes || "",
+                downloadDir: targetDir,
+                songs: sub.songs
+            })
         })
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(result) {
-        if (result.status === "success") {
-            logMessage("Download completed! Triggering Premiere Pro ExtendScript Bin Importer...");
-            btnElement.textContent = "🎬 Importing to Bins...";
+        .then(function(res) { return res.json(); })
+        .then(function(result) {
+            if (result.status === "success") {
+                logMessage("Download completed! Triggering Premiere Pro ExtendScript Bin Importer...");
+                btnElement.textContent = "🎬 Importing to Bins...";
 
-            var payloadStr = JSON.stringify(result);
-            var escapedPayload = payloadStr.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
-            var jsxScript = "$.weddingImporter.importWeddingAssets('" + escapedPayload + "')";
+                var payloadStr = JSON.stringify(result);
+                var escapedPayload = payloadStr.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+                var jsxScript = "$.weddingImporter.importWeddingAssets('" + escapedPayload + "')";
 
-            csInterface.evalScript(jsxScript, function(evalResult) {
-                try {
-                    var resObj = JSON.parse(evalResult);
-                    if (resObj.status === "success") {
-                        logMessage("🎉 SUCCESS: " + resObj.message + " (" + resObj.importedCount + " files)");
-                        btnElement.textContent = "✅ Imported to " + resObj.parentBinName;
+                csInterface.evalScript(jsxScript, function(evalResult) {
+                    try {
+                        var resObj = JSON.parse(evalResult);
+                        if (resObj.status === "success") {
+                            logMessage("🎉 SUCCESS: " + resObj.message + " (" + resObj.importedCount + " files)");
+                            btnElement.textContent = "✅ Imported to " + resObj.parentBinName;
 
-                        // Mark submission completed in cloud queue
-                        fetch(LOCAL_AGENT_URL + "/status", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ id: sub.id, status: "Completed", is_downloaded: true })
-                        }).then(function() {
-                            fetchSubmissionsData();
-                        });
-                    } else {
-                        logMessage("ExtendScript Error: " + resObj.message, true);
+                            // Mark submission completed in cloud queue
+                            fetch(LOCAL_AGENT_URL + "/status", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ id: sub.id, status: "Completed", is_downloaded: true })
+                            }).then(function() {
+                                fetchSubmissionsData();
+                            });
+                        } else {
+                            logMessage("ExtendScript Error: " + resObj.message, true);
+                            btnElement.disabled = false;
+                            btnElement.textContent = "⚠️ Import Retry";
+                        }
+                    } catch(ex) {
+                        logMessage("Raw ExtendScript Result: " + evalResult);
                         btnElement.disabled = false;
-                        btnElement.textContent = "⚠️ Import Retry";
+                        btnElement.textContent = "📥 Download & Import";
                     }
-                } catch(ex) {
-                    logMessage("Raw ExtendScript Result: " + evalResult);
-                    btnElement.disabled = false;
-                    btnElement.textContent = "📥 Download & Import";
-                }
-            });
-        } else {
-            throw new Error(result.message || "Failed to download tracks");
-        }
-    })
-    .catch(function(err) {
-        logMessage("Download & Import Error: " + err.message, true);
-        btnElement.disabled = false;
-        btnElement.textContent = "📥 Download & Import";
+                });
+            } else {
+                throw new Error(result.message || "Failed to download tracks");
+            }
+        })
+        .catch(function(err) {
+            logMessage("Download & Import Error: " + err.message, true);
+            btnElement.disabled = false;
+            btnElement.textContent = "📥 Download & Import";
+        });
     });
 }

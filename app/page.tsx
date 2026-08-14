@@ -19,6 +19,8 @@ import {
   FileText,
   MessageSquareHeart,
   Info,
+  Edit2,
+  Globe,
 } from 'lucide-react';
 
 interface FormSongTrack {
@@ -33,9 +35,107 @@ interface FormRitualCard {
   category: string;
   songs: FormSongTrack[];
   notes: string;
+  isCollapsed?: boolean;
 }
 
+const TRANSLATIONS = {
+  bn: {
+    headerTitle: 'বিবাহের গান নির্বাচন ফর্ম',
+    headerSubtitle: 'আপনার প্রতিটি শুভ মুহূর্তকে নিখুঁত সঙ্গীতে সাজান',
+    studioTag: 'স্টুডিও আইডি:',
+    langBtn: '🇬🇧 English',
+    coupleSectionTitle: 'বর ও কনের বিবরণ (Couple Information)',
+    coupleNameLabel: 'বরের নাম ও কনের নাম',
+    coupleNamePlaceholder: 'যেমন: রাহুল ও পূজা',
+    eventDateLabel: 'বিয়ের তারিখ (Event Date)',
+    phoneLabel: 'ফোন / হোয়াটসঅ্যাপ নম্বর',
+    phonePlaceholder: 'উদাহরণ: 9876543210',
+    generalNotesLabel: 'সামগ্রিক বিশেষ নির্দেশাবলী (ঐচ্ছিক)',
+    generalNotesPlaceholder: 'সম্পাদকের জন্য আপনার কোনো বিশেষ অনুরোধ বা থিম নোট...',
+    instructionTitle: '📌 নির্দেশনা (Instructions):',
+    instructionStep1: '১. ইউটিউব / স্পোটিফাই বা অডিও লিংকের ইউআরএল কপি করে বক্সে পেস্ট করুন।',
+    instructionStep2: '২. যদি কোনো নির্দিষ্ট সময় থেকে গান বাজাতে চান, টাইমস্ট্যাম্প (যেমন: 01:25) নোটে উল্লেখ করুন।',
+    instructionStep3: '৩. কোনো পর্ব বাদ দিতে চাইলে খালি রাখুন।',
+    preWeddingCategory: '💛 Pre-Wedding Ceremonies (আইবুড়ো ভাত, গায়ে হলুদ & মেহেন্দি)',
+    weddingCategory: '💍 Wedding Ceremony & Rituals (মূল বিবাহ অনুষ্ঠান)',
+    postWeddingCategory: '🌸 Post Wedding & Reception (বিদায়, ভাত কাপড় ও রিসেপশন)',
+    customCategory: '✨ কাস্টম পর্ব (Custom Rituals)',
+    addSongBtn: '+ আরও গান যোগ করুন',
+    notesLabel: '✂️ কাট নোটস / বিশেষ টাইমস্ট্যাম্প (ঐচ্ছিক):',
+    notesPlaceholder: 'যেমন: "০২:১৫ সেকেন্ড থেকে শুরু করুন" অথবা "রিফ্রেন পার্টটা ব্যাকগ্রাউন্ডে দিন"...',
+    addCustomRitualBtn: '➕ নতুন কোনো পর্ব যোগ করুন',
+    customRitualModalTitle: 'নতুন পর্ব যোগ করুন',
+    customRitualNamePlaceholder: 'পর্বের নাম (যেমন: সংগীত নাইট, রিং এক্সচেঞ্জ)',
+    cancelBtn: 'বাতিল',
+    confirmAddBtn: 'যোগ করুন',
+    submitBtn: '✨ গান জমা দিন',
+    submittingBtn: 'জমা দেওয়া হচ্ছে...',
+    addedBadge: 'যুক্ত হয়েছে',
+    editBtn: 'পরিবর্তন',
+    removeBtn: 'গান বাদ দিন',
+    successTitle: 'আপনার গানের তালিকা সফলভাবে সাবমিট হয়েছে! 🎉',
+    successSub: 'ধন্যবাদ! আপনাদের পছন্দের গানগুলো আমাদের Wedding Film Editing টিমের কাছে নিরাপদে পৌঁছে গেছে। ❤️',
+    submitAnotherBtn: '🔄 নতুন ফর্ম জমা দিন',
+    validationError: 'অনুগ্রহ করে বর-কনের নাম এবং অন্তত একটি বৈধ ইউটিউব/অডিও গান যুক্ত করুন।',
+  },
+  en: {
+    headerTitle: 'Wedding Song Selection Form',
+    headerSubtitle: 'Curate the perfect soundtrack for every special moment of your wedding',
+    studioTag: 'Studio ID:',
+    langBtn: '🇮🇳 বাংলা',
+    coupleSectionTitle: 'Groom & Bride Details',
+    coupleNameLabel: 'Groom & Bride Name',
+    coupleNamePlaceholder: 'e.g. Rahul & Puja',
+    eventDateLabel: 'Event Date',
+    phoneLabel: 'Phone / WhatsApp Number',
+    phonePlaceholder: 'e.g. 9876543210',
+    generalNotesLabel: 'General Special Instructions (Optional)',
+    generalNotesPlaceholder: 'Any general theme notes or specific requests for the editor...',
+    instructionTitle: '📌 Instructions:',
+    instructionStep1: '1. Copy & paste your YouTube / Spotify / Audio link into the box.',
+    instructionStep2: '2. Mention specific timestamps (e.g. 01:25) in notes if needed.',
+    instructionStep3: '3. Leave unneeded ritual boxes empty.',
+    preWeddingCategory: '💛 Pre-Wedding Ceremonies (Aiburobhat, Gaye Holud & Mehendi)',
+    weddingCategory: '💍 Wedding Ceremony & Rituals (Main Marriage Ceremony)',
+    postWeddingCategory: '🌸 Post Wedding & Reception (Biday, Bhat Kapor & Reception Night)',
+    customCategory: '✨ Custom Ceremonies',
+    addSongBtn: '+ Add Another Song',
+    notesLabel: '✂️ Cut Notes / Timestamp Requests (Optional):',
+    notesPlaceholder: 'e.g. "Start from 02:15 timestamp" or "Use instrumental loop in background"...',
+    addCustomRitualBtn: '➕ Add Custom Ritual',
+    customRitualModalTitle: 'Add Custom Ritual',
+    customRitualNamePlaceholder: 'Ritual Name (e.g. Sangeet Night, Ring Exchange)',
+    cancelBtn: 'Cancel',
+    confirmAddBtn: 'Add Ritual',
+    submitBtn: '✨ Submit Playlist',
+    submittingBtn: 'Submitting Playlist...',
+    addedBadge: 'Song Added',
+    editBtn: 'Edit',
+    removeBtn: 'Clear Song',
+    successTitle: 'Your songs have been submitted! 🎉',
+    successSub: 'Thank you! We have received your selected tracks. They will be imported into Premiere Pro as editing begins.',
+    submitAnotherBtn: '🔄 Submit Another Playlist',
+    validationError: 'Please provide Groom & Bride Name and at least one valid song link.',
+  },
+};
+
 export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studioId?: string } = {}) {
+  const [lang, setLang] = useState<'bn' | 'en'>('bn');
+  const t = TRANSLATIONS[lang];
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem('wedding_form_lang');
+    if (savedLang === 'en' || savedLang === 'bn') {
+      setLang(savedLang);
+    }
+  }, []);
+
+  const toggleLanguage = () => {
+    const nextLang = lang === 'bn' ? 'en' : 'bn';
+    setLang(nextLang);
+    localStorage.setItem('wedding_form_lang', nextLang);
+  };
+
   const [clientName, setClientName] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [phone, setPhone] = useState('');
@@ -51,6 +151,7 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
         category: r.category,
         songs: [{ id: `song-${r.id}-1`, url: '' }],
         notes: '',
+        isCollapsed: false,
       }))
     )
   );
@@ -68,6 +169,7 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
             category: r.category || 'wedding_ceremony',
             songs: [{ id: `song-custom-${r.id || idx}-1`, url: '' }],
             notes: '',
+            isCollapsed: false,
           }));
           setRituals(customCards);
         }
@@ -97,14 +199,19 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
     }
   };
 
-  // Handle URL change for a specific song in a ritual card
+  // Handle URL change with smart auto-collapsing
   const handleUrlChange = (ritualId: string, songId: string, url: string) => {
+    const trimmed = url.trim();
+    const isUrlValid = isValidUrl(trimmed);
+
     setRituals((prev) =>
       prev.map((card) => {
         if (card.id === ritualId) {
+          const updatedSongs = card.songs.map((s) => (s.id === songId ? { ...s, url } : s));
           return {
             ...card,
-            songs: card.songs.map((s) => (s.id === songId ? { ...s, url } : s)),
+            songs: updatedSongs,
+            isCollapsed: isUrlValid ? true : card.isCollapsed,
           };
         }
         return card;
@@ -112,12 +219,12 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
     );
   };
 
-  // Handle Paste from Clipboard for a specific song input
+  // Handle Paste from Clipboard
   const handlePaste = async (ritualId: string, songId: string) => {
     setClipboardNotice(null);
     try {
       if (!navigator.clipboard || !navigator.clipboard.readText) {
-        setClipboardNotice('Clipboard read not supported on this browser. Please paste manually.');
+        setClipboardNotice('Clipboard read not supported. Please paste manually.');
         return;
       }
       const text = await navigator.clipboard.readText();
@@ -138,6 +245,7 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
           return {
             ...card,
             songs: [...card.songs, { id: `song-${Date.now()}-${card.songs.length + 1}`, url: '' }],
+            isCollapsed: false,
           };
         }
         return card;
@@ -150,9 +258,12 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
     setRituals((prev) =>
       prev.map((card) => {
         if (card.id === ritualId && card.songs.length > 1) {
+          const filtered = card.songs.filter((s) => s.id !== songId);
+          const hasRemainingValidSong = filtered.some((s) => isValidUrl(s.url));
           return {
             ...card,
-            songs: card.songs.filter((s) => s.id !== songId),
+            songs: filtered,
+            isCollapsed: hasRemainingValidSong,
           };
         }
         return card;
@@ -160,14 +271,38 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
     );
   };
 
-  // Handle Notes change for a ritual card
+  // Handle Notes change
   const handleNotesChange = (ritualId: string, notes: string) => {
     setRituals((prev) =>
       prev.map((card) => (card.id === ritualId ? { ...card, notes } : card))
     );
   };
 
-  // Delete custom ritual
+  // Edit Control (Expands collapsed card)
+  const handleEditCard = (ritualId: string) => {
+    setRituals((prev) =>
+      prev.map((card) => (card.id === ritualId ? { ...card, isCollapsed: false } : card))
+    );
+  };
+
+  // Clear / Remove Control (Resets card and expands)
+  const handleClearCard = (ritualId: string) => {
+    setRituals((prev) =>
+      prev.map((card) => {
+        if (card.id === ritualId) {
+          return {
+            ...card,
+            songs: [{ id: `song-${card.id}-reset`, url: '' }],
+            notes: '',
+            isCollapsed: false,
+          };
+        }
+        return card;
+      })
+    );
+  };
+
+  // Delete custom ritual card
   const handleDeleteRitual = (ritualId: string) => {
     setRituals((prev) => prev.filter((card) => card.id !== ritualId));
   };
@@ -182,6 +317,7 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
       category: 'post_wedding_reception',
       songs: [{ id: `song-custom-${Date.now()}`, url: '' }],
       notes: '',
+      isCollapsed: false,
     };
     setRituals((prev) => [...prev, newCard]);
     setCustomRitualName('');
@@ -199,15 +335,14 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
     setErrorMessage(null);
 
     if (!clientName.trim()) {
-      setErrorMessage('অনুগ্রহ করে বরের ও কনের নাম (Client / Couple Name) লিখুন।');
+      setErrorMessage(t.validationError);
       return;
     }
     if (!eventDate) {
-      setErrorMessage('অনুগ্রহ করে আপনার বিয়ের / ইভেন্টের তারিখ নির্বাচন করুন।');
+      setErrorMessage(t.validationError);
       return;
     }
 
-    // Flatten valid songs for backend compatibility
     const validSongsPayload: SongItem[] = [];
 
     rituals.forEach((card) => {
@@ -227,7 +362,7 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
     });
 
     if (validSongsPayload.length === 0) {
-      setErrorMessage('কমপক্ষে ১টি ভ্যালিড YouTube / Audio গান লিংক শেয়ার করুন।');
+      setErrorMessage(t.validationError);
       return;
     }
 
@@ -248,17 +383,26 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
       });
 
       const json = await res.json();
+
       if (!json.success) {
-        throw new Error(json.error || 'গান সাবমিট করতে সমস্যা হয়েছে');
+        throw new Error(json.error || 'Failed to submit playlist');
       }
 
       setIsSubmitted(true);
     } catch (err: any) {
       console.error('Submission error:', err);
-      setErrorMessage(err.message || 'সাবমিট করার সময় একটি ত্রুটি ঘটেছে। আবার চেষ্টা করুন।');
+      setErrorMessage(err.message || 'An error occurred while submitting.');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Format Display Title depending on Language
+  const getRitualDisplayTitle = (card: FormRitualCard) => {
+    if (lang === 'en') {
+      return card.englishTag || card.ritualName;
+    }
+    return card.ritualName;
   };
 
   // Success Confirmation Screen
@@ -270,35 +414,35 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
         </div>
 
         <h1 className="font-serif text-3xl sm:text-4xl font-bold gradient-text mb-3">
-          আপনার গানের তালিকা সফলভাবে সাবমিট হয়েছে! 🎉
+          {t.successTitle}
         </h1>
         <p className="text-slate-300 max-w-lg mb-6 text-sm sm:text-base leading-relaxed">
-          ধন্যবাদ <span className="text-amber-300 font-semibold">{clientName}</span>! আপনাদের পছন্দের গানগুলো আমাদের Wedding Film Editing টিমের কাছে নিরাপদে পৌঁছে গেছে। ❤️
+          {t.successSub}
         </p>
 
         <div className="glass-card p-6 rounded-2xl max-w-md w-full mb-8 text-left border-amber-500/30 shadow-xl space-y-3">
           <h3 className="text-xs uppercase tracking-wider text-amber-400 font-semibold pb-2 border-b border-white/10 flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-amber-400" /> সাবমিশন সামারি (Submission Details)
+            <Sparkles className="w-4 h-4 text-amber-400" /> Summary
           </h3>
           <div className="space-y-2 text-sm text-slate-300">
             <p className="flex justify-between">
-              <span className="text-slate-400">বরের ও কনের নাম:</span>
+              <span className="text-slate-400">{t.coupleNameLabel}:</span>
               <strong className="text-white font-medium">{clientName}</strong>
             </p>
             <p className="flex justify-between">
-              <span className="text-slate-400">বিয়ের তারিখ:</span>
+              <span className="text-slate-400">{t.eventDateLabel}:</span>
               <strong className="text-white font-medium">{eventDate}</strong>
             </p>
             {phone && (
               <p className="flex justify-between">
-                <span className="text-slate-400">যোগাযোগের নম্বর:</span>
+                <span className="text-slate-400">{t.phoneLabel}:</span>
                 <strong className="text-amber-300 font-medium">{phone}</strong>
               </p>
             )}
             <p className="flex justify-between items-center">
-              <span className="text-slate-400">মোট সাবমিট হওয়া গান:</span>
+              <span className="text-slate-400">Total Songs Submitted:</span>
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs border border-emerald-500/30">
-                {totalValidSongs} টি ট্র্যাক
+                {totalValidSongs} Tracks
               </span>
             </p>
           </div>
@@ -320,69 +464,254 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
                   category: r.category,
                   songs: [{ id: `song-${r.id}-1`, url: '' }],
                   notes: '',
+                  isCollapsed: false,
                 }))
               )
             );
           }}
           className="px-6 py-3 rounded-xl font-medium bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all shadow-lg hover:scale-105"
         >
-          নতুন কোনো রিকোয়েস্ট সাবমিট করুন
+          {t.submitAnotherBtn}
         </button>
       </div>
     );
   }
 
+  // Render Ritual Section Cards
+  const renderRitualsGroup = (categoryKey: string, categoryTitle: string) => {
+    const categoryRituals = rituals.filter((r) => r.category === categoryKey);
+    if (categoryRituals.length === 0) return null;
+
+    return (
+      <div className="space-y-4">
+        <h2 className="font-serif text-lg sm:text-xl font-semibold text-amber-300 pb-2 border-b border-amber-500/20 flex items-center justify-between">
+          <span>{categoryTitle}</span>
+          <span className="text-xs font-normal text-slate-400">
+            ({categoryRituals.filter((r) => r.songs.some((s) => isValidUrl(s.url))).length} / {categoryRituals.length} Filled)
+          </span>
+        </h2>
+
+        <div className="space-y-3">
+          {categoryRituals.map((card) => {
+            const validTracks = card.songs.filter((s) => isValidUrl(s.url));
+            const hasValidSong = validTracks.length > 0;
+            const isCollapsed = card.isCollapsed && hasValidSong;
+
+            if (isCollapsed) {
+              // Collapsed Slim Summary Bar
+              return (
+                <div
+                  key={card.id}
+                  className="glass-card p-4 rounded-xl border-emerald-500/40 bg-emerald-950/10 flex items-center justify-between gap-3 shadow-md hover:border-emerald-500/60 transition-all"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+                      <CheckCircle2 className="w-4 h-4" />
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-sm text-white truncate">
+                          {getRitualDisplayTitle(card)}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[10px] border border-emerald-500/30">
+                          {t.addedBadge} ({validTracks.length})
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400 truncate max-w-sm sm:max-w-md">
+                        {validTracks[0]?.url}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleEditCard(card.id)}
+                      className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-medium transition-all flex items-center gap-1"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>{t.editBtn}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleClearCard(card.id)}
+                      className="px-3 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-medium transition-all flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{t.removeBtn}</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+
+            // Expanded Card View
+            return (
+              <div
+                key={card.id}
+                className={`glass-card p-5 sm:p-6 rounded-2xl border-white/10 transition-all ${
+                  hasValidSong ? 'border-amber-500/40 bg-amber-950/5' : ''
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <h3 className="font-medium text-sm sm:text-base text-white flex items-center gap-2">
+                    <Music className="w-4 h-4 text-amber-400 shrink-0" />
+                    <span>{getRitualDisplayTitle(card)}</span>
+                  </h3>
+                  {card.id.startsWith('custom-') && (
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteRitual(card.id)}
+                      className="text-xs text-rose-400 hover:text-rose-300 transition-colors flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  {card.songs.map((songTrack, index) => (
+                    <div key={songTrack.id} className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <input
+                          type="url"
+                          placeholder="https://www.youtube.com/watch?v=..."
+                          value={songTrack.url}
+                          onChange={(e) => handleUrlChange(card.id, songTrack.id, e.target.value)}
+                          className="w-full px-4 py-2.5 pr-20 rounded-xl glass-input text-xs sm:text-sm placeholder:text-slate-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handlePaste(card.id, songTrack.id)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-[11px] font-medium transition-all flex items-center gap-1"
+                        >
+                          <Clipboard className="w-3 h-3" />
+                          <span>Paste</span>
+                        </button>
+                      </div>
+
+                      {card.songs.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSongFromRitual(card.id, songTrack.id)}
+                          className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition-all shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+
+                  <div className="flex items-center justify-between pt-1">
+                    <button
+                      type="button"
+                      onClick={() => handleAddSongToRitual(card.id)}
+                      className="text-xs text-amber-400 hover:text-amber-300 font-medium transition-colors flex items-center gap-1"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>{t.addSongBtn}</span>
+                    </button>
+                  </div>
+
+                  {/* Cut Notes Field */}
+                  <div className="pt-2 border-t border-white/5">
+                    <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                      {t.notesLabel}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder={t.notesPlaceholder}
+                      value={card.notes}
+                      onChange={(e) => handleNotesChange(card.id, e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg glass-input text-xs placeholder:text-slate-600"
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="pb-32 space-y-8">
-      {/* Bengali Header & Welcome Card */}
-      <div className="glass-card p-6 sm:p-8 rounded-3xl border-amber-500/30 relative overflow-hidden text-center sm:text-left">
+    <div className="pb-32 space-y-8 max-w-4xl mx-auto px-3 sm:px-6 pt-4">
+      {/* Top Header & Language Switcher */}
+      <div className="glass-card p-6 sm:p-8 rounded-3xl border-amber-500/30 relative overflow-hidden text-center sm:text-left shadow-2xl">
         <div className="absolute -top-16 -right-16 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-amber-500/20 border border-amber-500/40 mb-4 text-xs font-semibold text-amber-300 shadow-sm">
-          <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-          <span>Cinematic Wedding Film Music Curator</span>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/20 via-rose-500/20 to-amber-500/20 border border-amber-500/40 text-xs font-semibold text-amber-300 shadow-sm">
+            <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+            <span>{t.studioTag} <strong className="text-white font-bold">{studioId}</strong></span>
+          </div>
+
+          {/* Language Toggle Button */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-medium text-xs transition-all shadow-md flex items-center gap-1.5 hover:scale-105 active:scale-95"
+          >
+            <Globe className="w-3.5 h-3.5 text-amber-400" />
+            <span>{t.langBtn}</span>
+          </button>
         </div>
 
         <h1 className="font-serif text-2xl sm:text-4xl font-bold gradient-text tracking-tight mb-3">
-          🎬 Wedding Film Music Selection Form
+          🎬 {t.headerTitle}
         </h1>
 
         <p className="text-slate-200 text-sm sm:text-base leading-relaxed mb-4">
-          Hello 😊 আপনাদের Wedding Film-টিকে আরও সুন্দর ও ব্যক্তিগত করে তুলতে নিচের প্রতিটি রিচুয়ালের জন্য আপনাদের পছন্দের YouTube Song Link শেয়ার করুন। ❤️
+          {t.headerSubtitle} ❤️
         </p>
 
-        {/* Instructions Banner Box */}
-        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs sm:text-sm space-y-2 text-left">
+        {/* Instructions Banner */}
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs sm:text-sm space-y-1.5 text-left">
           <div className="font-semibold text-amber-300 flex items-center gap-1.5 text-sm">
             <Info className="w-4 h-4 shrink-0 text-amber-400" />
-            <span>📌 নির্দেশনা (Instructions):</span>
+            <span>{t.instructionTitle}</span>
           </div>
-          <ul className="list-disc list-inside space-y-1 text-slate-300 text-xs sm:text-sm leading-relaxed pl-1">
-            <li>প্রতিটি অংশের জন্য চাইলে একাধিক গান দিতে পারবেন (<strong>+ Add Song</strong>)।</li>
-            <li>
-              কোনো নির্দিষ্ট অংশ কেটে বাদ দেওয়া বা স্পেশাল টাইমিং পছন্দ থাকলে (যেমন: <code className="bg-black/40 px-1.5 py-0.5 rounded text-amber-300 font-mono text-xs">Start 0:15 - End 1:30</code>) নিচে স্পেশাল নোটস বক্সে লিখে দিন।
-            </li>
+          <ul className="space-y-1 text-slate-300 text-xs sm:text-sm leading-relaxed pl-1">
+            <li>{t.instructionStep1}</li>
+            <li>{t.instructionStep2}</li>
+            <li>{t.instructionStep3}</li>
           </ul>
         </div>
       </div>
 
+      {clipboardNotice && (
+        <div className="p-3 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{clipboardNotice}</span>
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs sm:text-sm flex items-center gap-2 animate-shake">
+          <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
+
       {/* Main Submission Form */}
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Couple & Event Details */}
+        {/* Couple Information Section */}
         <div className="glass-card p-5 sm:p-6 rounded-2xl border-white/10 relative">
           <h2 className="font-serif text-lg sm:text-xl font-semibold text-amber-200 mb-4 flex items-center gap-2">
-            <User className="w-5 h-5 text-amber-400" /> বরের ও কনের বিবরণ (Couple Information)
+            <User className="w-5 h-5 text-amber-400" /> {t.coupleSectionTitle}
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-amber-400" /> বরের নাম ও কনের নাম <span className="text-rose-400">*</span>
+                <User className="w-3.5 h-3.5 text-amber-400" /> {t.coupleNameLabel} <span className="text-rose-400">*</span>
               </label>
               <input
                 type="text"
                 required
-                placeholder="যেমন: Rahul & Ananya"
+                placeholder={t.coupleNamePlaceholder}
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl glass-input text-sm placeholder:text-slate-500"
@@ -391,305 +720,126 @@ export default function ClientSubmissionPage({ studioId = 'trpworld' }: { studio
 
             <div>
               <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-amber-400" /> ইভেন্টের তারিখ (Event Date) <span className="text-rose-400">*</span>
+                <Calendar className="w-3.5 h-3.5 text-amber-400" /> {t.eventDateLabel} <span className="text-rose-400">*</span>
               </label>
               <input
                 type="date"
                 required
                 value={eventDate}
                 onChange={(e) => setEventDate(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl glass-input text-sm text-slate-200"
+                className="w-full px-4 py-2.5 rounded-xl glass-input text-sm"
               />
             </div>
 
             <div>
               <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1.5">
-                <Phone className="w-3.5 h-3.5 text-emerald-400" /> ফোন / হোয়াটসঅ্যাপ (Phone / WhatsApp)
+                <Phone className="w-3.5 h-3.5 text-amber-400" /> {t.phoneLabel} <span className="text-rose-400">*</span>
               </label>
               <input
                 type="tel"
-                placeholder="+91 9876543210 (Optional)"
+                required
+                placeholder={t.phonePlaceholder}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl glass-input text-sm placeholder:text-slate-500"
               />
             </div>
           </div>
+
+          <div className="mt-4">
+            <label className="block text-xs font-medium text-slate-300 mb-1.5 flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-amber-400" /> {t.generalNotesLabel}
+            </label>
+            <textarea
+              rows={2}
+              placeholder={t.generalNotesPlaceholder}
+              value={generalNotes}
+              onChange={(e) => setGeneralNotes(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl glass-input text-xs sm:text-sm placeholder:text-slate-500 resize-none"
+            />
+          </div>
         </div>
 
-        {/* Clipboard warning / notice */}
-        {clipboardNotice && (
-          <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
-            <span>{clipboardNotice}</span>
-          </div>
-        )}
-
-        {/* Error banner */}
-        {errorMessage && (
-          <div className="p-4 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-200 text-sm flex items-center gap-2.5">
-            <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
-            <span>{errorMessage}</span>
-          </div>
-        )}
-
-        {/* Categorized Ritual Sections (25 Traditional Bengali Rituals) */}
-        {BENGALI_RITUAL_GROUPS.map((group) => {
-          const groupRituals = rituals.filter((r) => r.category === group.id);
-
-          return (
-            <div key={group.id} className="space-y-4">
-              {/* Category Header */}
-              <div className="px-1 border-b border-white/10 pb-3">
-                <h2 className="font-serif text-xl sm:text-2xl font-bold text-amber-300 flex items-center gap-2">
-                  <span>{group.icon}</span>
-                  <span>{group.title}</span>
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                  {group.subtitle}
-                </p>
-              </div>
-
-              {/* Ritual Cards */}
-              <div className="space-y-4">
-                {groupRituals.map((card) => {
-                  const cardHasValidSong = card.songs.some((s) => isValidUrl(s.url));
-
-                  return (
-                    <div
-                      key={card.id}
-                      className={`glass-card p-4 sm:p-5 rounded-2xl transition-all duration-200 relative ${
-                        cardHasValidSong
-                          ? 'border-emerald-500/40 bg-emerald-950/10'
-                          : 'border-white/10'
-                      }`}
-                    >
-                      {/* Card Top Title & Status */}
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-semibold text-base sm:text-lg text-slate-100">
-                            {card.ritualName}
-                          </span>
-                          {cardHasValidSong && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                              <CheckCircle2 className="w-3.5 h-3.5" /> Link Added
-                            </span>
-                          )}
-                        </div>
-
-                        {card.id.startsWith('custom-') && (
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteRitual(card.id)}
-                            title="Remove ritual"
-                            className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Song Track Inputs for this Ritual Card */}
-                      <div className="space-y-3">
-                        {card.songs.map((songTrack, sIdx) => {
-                          const validTrack = isValidUrl(songTrack.url);
-                          return (
-                            <div key={songTrack.id} className="space-y-1.5">
-                              {card.songs.length > 1 && (
-                                <span className="text-[11px] font-semibold text-amber-300/90 block">
-                                  Song {sIdx + 1}:
-                                </span>
-                              )}
-                              <div className="relative flex items-center">
-                                <input
-                                  type="url"
-                                  placeholder={`YouTube / Audio link (যেমন: https://youtu.be/...) ${
-                                    card.songs.length > 1 ? `#${sIdx + 1}` : ''
-                                  }`}
-                                  value={songTrack.url}
-                                  onChange={(e) =>
-                                    handleUrlChange(card.id, songTrack.id, e.target.value)
-                                  }
-                                  className={`w-full pl-3 pr-28 py-2.5 rounded-xl glass-input text-sm ${
-                                    validTrack ? 'border-emerald-500/50 focus:border-emerald-400' : ''
-                                  }`}
-                                />
-                                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                                  {card.songs.length > 1 && (
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRemoveSongFromRitual(card.id, songTrack.id)}
-                                      title="Remove song"
-                                      className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs transition-all"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
-                                  )}
-                                  <button
-                                    type="button"
-                                    onClick={() => handlePaste(card.id, songTrack.id)}
-                                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-medium transition-all"
-                                  >
-                                    <Clipboard className="w-3.5 h-3.5" /> Paste
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-
-                        {/* Add Another Song Button */}
-                        <div className="flex justify-start">
-                          <button
-                            type="button"
-                            onClick={() => handleAddSongToRitual(card.id)}
-                            className="flex items-center gap-1 text-xs font-semibold text-amber-300 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-lg border border-amber-500/30 transition-all"
-                          >
-                            <Plus className="w-3.5 h-3.5" /> Add Another Song (+গান যোগ করুন)
-                          </button>
-                        </div>
-
-                        {/* Special Editing Notes Box per Ritual */}
-                        <div className="pt-1">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <Clock className="w-3.5 h-3.5 text-amber-400" />
-                            <span className="text-xs text-slate-300 font-medium">
-                              স্পেশাল এডিটিং নোটস (Special Timings & Cuts Instructions):
-                            </span>
-                          </div>
-                          <textarea
-                            rows={2}
-                            placeholder="কোন অংশটা কাটতে হবে বা স্পেশাল কোনো নির্দেশনা থাকলে লিখুন (যেমন: 0:25 থেকে শুরু করুন / এই ড্রপটা রাখুন)..."
-                            value={card.notes}
-                            onChange={(e) => handleNotesChange(card.id, e.target.value)}
-                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
+        {/* Ritual Categories */}
+        {renderRitualsGroup('pre_wedding', t.preWeddingCategory)}
+        {renderRitualsGroup('wedding_ceremony', t.weddingCategory)}
+        {renderRitualsGroup('post_wedding_reception', t.postWeddingCategory)}
 
         {/* Add Custom Ritual Button */}
         <div className="flex justify-center pt-2">
           <button
             type="button"
             onClick={() => setShowAddRitualModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm bg-gradient-to-r from-amber-500/20 to-rose-500/20 text-amber-200 border border-amber-500/40 hover:bg-amber-500/30 transition-all shadow-md"
+            className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/20 text-amber-300 font-medium text-xs sm:text-sm transition-all shadow-md flex items-center gap-2 hover:scale-105"
           >
-            <Plus className="w-4 h-4 text-amber-400" />
-            <span>অন্যান্য বা কাস্টম রিচুয়াল যোগ করুন (+ Add Custom Ritual)</span>
+            <span>{t.addCustomRitualBtn}</span>
           </button>
         </div>
 
-        {/* Overall General Project Notes Box */}
-        <div className="glass-card p-5 sm:p-6 rounded-2xl border-white/10 space-y-2">
-          <h3 className="font-serif text-base sm:text-lg font-semibold text-amber-200 flex items-center gap-2">
-            <MessageSquareHeart className="w-5 h-5 text-rose-400" /> সার্বিক নির্দেশনা ও শুভেচ্ছা (General Project Notes & Wishes)
-          </h3>
-          <p className="text-xs text-slate-400">
-            আমাদের ওয়েডিং ফিল্ম এডিটিং টিমের জন্য আপনার কোনো বিশেষ পছন্দ, মোট গানের মেজাজ বা বার্তা থাকলে নিচে জানাতে পারেন।
-          </p>
-          <textarea
-            rows={3}
-            placeholder="আপনার সার্বিক চিন্তা বা অতিরিক্ত কোনো বার্তা এখানে লিখুন..."
-            value={generalNotes}
-            onChange={(e) => setGeneralNotes(e.target.value)}
-            className="w-full bg-black/40 border border-white/10 rounded-xl p-3.5 text-xs sm:text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50"
-          />
-        </div>
+        {/* Submit Floating Action Bar */}
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-950/80 backdrop-blur-xl border-t border-white/10 z-40">
+          <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs text-slate-400">Total Filled Songs:</p>
+              <p className="text-sm font-bold text-emerald-400 flex items-center gap-1">
+                <Music className="w-4 h-4" /> {totalValidSongs} Tracks
+              </p>
+            </div>
 
-        {/* Heartfelt Bengali Footer Message */}
-        <div className="text-center py-4 px-3 glass-card rounded-2xl border-amber-500/20 bg-amber-500/5">
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-serif">
-            আপনাদের পছন্দের গানগুলো আমাদের Wedding Film-কে আরও সুন্দর, আবেগপূর্ণ এবং সম্পূর্ণ আপনাদের মতো করে তুলতে সাহায্য করবে। ❤️
-            <br />
-            <span className="text-amber-300 font-semibold mt-1 inline-block">ধন্যবাদ। 🙏</span>
-          </p>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-8 py-3.5 rounded-xl font-bold bg-gradient-to-r from-amber-500 via-rose-500 to-amber-500 hover:from-amber-400 hover:via-rose-400 hover:to-amber-400 text-slate-950 shadow-xl shadow-amber-500/20 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center gap-2 text-sm sm:text-base"
+            >
+              {isSubmitting ? (
+                <>
+                  <Clock className="w-5 h-5 animate-spin" />
+                  <span>{t.submittingBtn}</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-5 h-5" />
+                  <span>{t.submitBtn}</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </form>
 
       {/* Add Custom Ritual Modal */}
       {showAddRitualModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="glass-card p-6 rounded-2xl max-w-sm w-full border-amber-500/40 shadow-2xl">
-            <h3 className="font-serif text-lg font-bold text-amber-200 mb-2">
-              কাস্টম রিচুয়াল যোগ করুন (Add Custom Ritual)
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="glass-card p-6 rounded-2xl max-w-sm w-full space-y-4 border-amber-500/40 shadow-2xl">
+            <h3 className="font-serif text-lg font-bold text-amber-300">
+              {t.customRitualModalTitle}
             </h3>
-            <p className="text-xs text-slate-400 mb-4">
-              আপনার ইভেন্টের বিশেষ কোনো অংশের নাম লিখুন (যেমন: "ককটেল পার্টি 🍸" / "ফার্স্ট ডান্স 💃")।
-            </p>
             <input
               type="text"
-              autoFocus
-              placeholder="যেমন: প্রি-ওয়েডিং শুট 🎬"
+              placeholder={t.customRitualNamePlaceholder}
               value={customRitualName}
               onChange={(e) => setCustomRitualName(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl glass-input text-sm mb-4"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleAddCustomRitual();
-              }}
+              className="w-full px-4 py-2.5 rounded-xl glass-input text-sm placeholder:text-slate-500"
             />
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setShowAddRitualModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-medium text-slate-300 hover:bg-white/10"
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-medium transition-all"
               >
-                বাতিল করুন (Cancel)
+                {t.cancelBtn}
               </button>
               <button
                 type="button"
                 onClick={handleAddCustomRitual}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-md"
+                className="px-4 py-2 rounded-xl bg-amber-500 text-slate-950 text-xs font-bold transition-all hover:bg-amber-400"
               >
-                যোগ করুন (Add)
+                {t.confirmAddBtn}
               </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Sticky Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 p-4 bg-[#0f0a15]/95 backdrop-blur-xl border-t border-white/10 shadow-2xl">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
-          <div>
-            <span className="text-xs text-slate-400 block font-medium">যুক্ত হওয়া গান</span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xl font-bold text-amber-400">
-                {totalValidSongs}
-              </span>
-              <span className="text-xs text-slate-400">টি গান সিলেক্ট করা হয়েছে</span>
-            </div>
-          </div>
-
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting || totalValidSongs === 0 || !clientName || !eventDate}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all shadow-xl ${
-              isSubmitting || totalValidSongs === 0 || !clientName || !eventDate
-                ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5'
-                : 'gradient-btn text-white hover:scale-105 active:scale-95'
-            }`}
-          >
-            {isSubmitting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>সাবমিট হচ্ছে...</span>
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4" />
-                <span>📤 সাবমিট করুন (Submit Playlist)</span>
-              </>
-            )}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
